@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NEU Laboratory Usage Log</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+
+/* ======== LIGHT MODE (DEFAULT) ======== */
+:root {
+  --neu-red: #CC0000;
+  --neu-gold: #E6A800;
+  --neu-dark: #F0F2F5;
+  --neu-surface: #FFFFFF;
+  --neu-card: #FFFFFF;
+  --neu-border: #E0E0E0;
+  --neu-text: #1A1A1A;
+  --neu-muted: #666666;
+  --neu-green: #16A34A;
+  --neu-orange: #EA580C;
+  --neu-blue: #2563EB;
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+
+/* ======== DARK MODE ======== */
+:root.dark {
+  --neu-red: #CC0000;
+  --neu-gold: #FFB800;
+  --neu-dark: #0D0D0D;
+  --neu-surface: #141414;
+  --neu-card: #1C1C1C;
+  --neu-border: #2A2A2A;
+  --neu-text: #F0F0F0;
+  --neu-muted: #888;
+  --neu-green: #22C55E;
+  --neu-orange: #F97316;
+  --neu-blue: #3B82F6;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--neu-dark);
+  color: var(--neu-text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* UTILS */
+.hidden { display: none !important; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+
+/* ======== PAGE SYSTEM ======== */
+.page { display: none; min-height: 100vh; }
+.page.active { display: flex; flex-direction: column; }
+
+/* ======== LOGIN PAGE ======== */
+#page-login {
+  background:
+    radial-gradient(ellipse at 60% 0%, rgba(204,0,0,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 100%, rgba(230,168,0,0.08) 0%, transparent 50%),
+    var(--neu-dark);
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.login-card {
+  background: var(--neu-card);
+  border: 1px solid var(--neu-border);
+  border-radius: 20px;
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+.login-card::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 20px; right: 20px; height: 3px;
+  background: linear-gradient(90deg, var(--neu-red), var(--neu-gold));
+  border-radius: 0 0 4px 4px;
+}
+.login-logo {
+  display: flex; flex-direction: column; align-items: center; margin-bottom: 32px;
+}
+.logo-badge {
+  width: 64px; height: 64px;
+  background: linear-gradient(135deg, var(--neu-red), #990000);
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800; font-size: 22px; color: white;
+  margin-bottom: 12px;
+  box-shadow: 0 8px 24px rgba(204,0,0,0.25);
+}
+.login-logo h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px; font-weight: 700;
+  letter-spacing: 0.02em; text-align: center;
+  color: var(--neu-text);
+}
+.login-logo p {
+  font-size: 12px; color: var(--neu-muted);
+  margin-top: 4px; letter-spacing: 0.08em; text-transform: uppercase;
+}
+.login-tabs {
+  display: flex; border: 1px solid var(--neu-border);
+  border-radius: 10px; margin-bottom: 24px; overflow: hidden;
+}
+.login-tab {
+  flex: 1; padding: 10px; text-align: center;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  background: transparent; border: none; color: var(--neu-muted);
+  transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+}
+.login-tab.active { background: var(--neu-red); color: white; }
+
+/* ======== BUTTONS ======== */
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 13px 20px; border-radius: 10px; font-size: 14px; font-weight: 500;
+  cursor: pointer; border: none; width: 100%; transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.btn-google { background: white; color: #333; margin-bottom: 12px; border: 1px solid #E0E0E0; }
+.btn-google:hover { background: #f5f5f5; }
+.btn-primary { background: linear-gradient(135deg, var(--neu-red), #aa0000); color: white; }
+.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-success { background: linear-gradient(135deg, #16a34a, #15803d); color: white; }
+.btn-outline {
+  background: transparent; border: 1px solid var(--neu-border);
+  color: var(--neu-text);
+}
+.btn-outline:hover { border-color: var(--neu-muted); }
+.btn-gold {
+  background: linear-gradient(135deg, var(--neu-gold), #c98f00);
+  color: white; font-weight: 600;
+}
+.btn-sm { padding: 8px 14px; font-size: 12px; border-radius: 8px; width: auto; }
+.btn-danger { background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; }
+
+/* ======== FORM ELEMENTS ======== */
+.divider {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 12px; color: var(--neu-muted); margin: 16px 0;
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--neu-border);
+}
+.alert {
+  padding: 12px 14px; border-radius: 8px; font-size: 13px;
+  margin-top: 12px; display: none;
+}
+.alert.error { background: rgba(204,0,0,0.10); border: 1px solid rgba(204,0,0,0.3); color: #CC0000; }
+.alert.success { background: rgba(22,163,74,0.10); border: 1px solid rgba(22,163,74,0.3); color: #16A34A; }
+.alert.show { display: flex; align-items: center; gap: 8px; }
+.qr-panel { text-align: center; }
+.qr-box {
+  width: 160px; height: 160px; background: #f9f9f9; border-radius: 12px;
+  border: 2px dashed var(--neu-border);
+  margin: 0 auto 16px; display: flex; align-items: center; justify-content: center;
+  flex-direction: column; color: var(--neu-muted); font-size: 12px; gap: 8px; padding: 12px;
+}
+.qr-icon { font-size: 64px; }
+.input-field {
+  width: 100%; padding: 12px 14px; background: var(--neu-surface);
+  border: 1px solid var(--neu-border); border-radius: 10px;
+  color: var(--neu-text); font-family: 'DM Sans', sans-serif; font-size: 14px;
+  margin-bottom: 12px; transition: border-color 0.2s; outline: none;
+}
+.input-field:focus { border-color: var(--neu-red); }
+.input-field option { background: var(--neu-surface); color: var(--neu-text); }
+label {
+  font-size: 12px; color: var(--neu-muted); display: block;
+  margin-bottom: 6px; letter-spacing: 0.04em; text-transform: uppercase;
+}
+
+/* ======== APP LAYOUT ======== */
+.app-layout { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 240px; background: var(--neu-surface);
+  border-right: 1px solid var(--neu-border);
+  display: flex; flex-direction: column; flex-shrink: 0;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+}
+.sidebar-logo {
+  padding: 20px; border-bottom: 1px solid var(--neu-border);
+  display: flex; align-items: center; gap: 10px;
+}
+.sidebar-logo-badge {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--neu-red), #990000);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 14px; color: white;
+}
+.sidebar-logo-text { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; line-height: 1.2; color: var(--neu-text); }
+.sidebar-logo-sub { font-size: 10px; color: var(--neu-muted); }
+.sidebar-nav { flex: 1; padding: 12px; }
+.nav-section {
+  font-size: 10px; color: var(--neu-muted); letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 16px 8px 6px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+  border-radius: 8px; font-size: 13px; cursor: pointer;
+  color: var(--neu-muted); transition: all 0.15s; margin-bottom: 2px;
+}
+.nav-item:hover { background: var(--neu-dark); color: var(--neu-text); }
+.nav-item.active { background: rgba(204,0,0,0.10); color: var(--neu-red); font-weight: 500; }
+.nav-icon { width: 18px; text-align: center; font-size: 15px; }
+.sidebar-user {
+  padding: 12px; border-top: 1px solid var(--neu-border);
+  display: flex; align-items: center; gap: 10px;
+}
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--neu-red), var(--neu-gold));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px; color: white;
+  flex-shrink: 0;
+}
+.sidebar-user-info { flex: 1; min-width: 0; }
+.sidebar-user-name {
+  font-size: 12px; font-weight: 500; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; color: var(--neu-text);
+}
+.sidebar-user-role { font-size: 10px; color: var(--neu-muted); }
+.logout-btn {
+  background: none; border: none; color: var(--neu-muted);
+  cursor: pointer; font-size: 16px; padding: 4px; transition: color 0.15s;
+}
+.logout-btn:hover { color: var(--neu-red); }
+.main-content { flex: 1; overflow-y: auto; background: var(--neu-dark); }
+
+/* ======== TOPBAR ======== */
+.topbar {
+  background: var(--neu-surface); border-bottom: 1px solid var(--neu-border);
+  padding: 14px 24px; display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 10;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.topbar-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--neu-text); }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+
+/* Theme Toggle */
+.theme-btn {
+  background: var(--neu-dark); border: 1px solid var(--neu-border);
+  border-radius: 8px; padding: 6px 12px; cursor: pointer;
+  color: var(--neu-text); font-size: 12px; font-family: 'DM Sans', sans-serif;
+  transition: all 0.2s;
+}
+.theme-btn:hover { border-color: var(--neu-red); color: var(--neu-red); }
+
+/* ======== BADGES ======== */
+.badge { padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+.badge-green { background: rgba(22,163,74,0.12); color: var(--neu-green); }
+.badge-red   { background: rgba(204,0,0,0.12);   color: var(--neu-red); }
+.badge-orange{ background: rgba(234,88,12,0.12);  color: var(--neu-orange); }
+.badge-blue  { background: rgba(37,99,235,0.12);  color: var(--neu-blue); }
+.badge-gold  { background: rgba(230,168,0,0.15);  color: var(--neu-gold); }
+
+/* ======== CONTENT PANELS ======== */
+.content-panel { padding: 24px; display: none; }
+.content-panel.active { display: block; }
+
+/* ======== STAT CARDS ======== */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px; margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--neu-card); border: 1px solid var(--neu-border);
+  border-radius: 14px; padding: 20px; position: relative; overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.stat-card::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.stat-card.red::after   { background: var(--neu-red); }
+.stat-card.gold::after  { background: var(--neu-gold); }
+.stat-card.green::after { background: var(--neu-green); }
+.stat-card.blue::after  { background: var(--neu-blue); }
+.stat-icon  { font-size: 28px; margin-bottom: 12px; }
+.stat-value { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; line-height: 1; color: var(--neu-text); }
+.stat-label { font-size: 12px; color: var(--neu-muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+.stat-change { font-size: 11px; margin-top: 8px; }
+.stat-up   { color: var(--neu-green); }
+.stat-down { color: var(--neu-red); }
+
+/* ======== ROOM CARDS ======== */
+.rooms-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px; margin-bottom: 24px;
+}
+.room-card {
+  background: var(--neu-card); border: 1px solid var(--neu-border);
+  border-radius: 12px; padding: 16px; cursor: pointer;
+  transition: all 0.2s; position: relative; box-shadow: var(--shadow);
+}
+.room-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.10); }
+.room-card.occupied  { border-color: rgba(204,0,0,0.35); }
+.room-card.available { border-color: rgba(22,163,74,0.35); }
+.room-number   { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--neu-text); }
+.room-building { font-size: 11px; color: var(--neu-muted); margin-top: 2px; }
+.room-status-dot {
+  position: absolute; top: 14px; right: 14px;
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.dot-green { background: var(--neu-green); box-shadow: 0 0 6px var(--neu-green); }
+.dot-red   { background: var(--neu-red); box-shadow: 0 0 6px var(--neu-red); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.room-timer { font-size: 11px; color: var(--neu-orange); margin-top: 8px; }
+.room-prof  { font-size: 11px; color: var(--neu-muted); }
+
+/* ======== SESSION CARDS ======== */
+.session-card {
+  background: var(--neu-card); border: 1px solid var(--neu-border);
+  border-radius: 16px; padding: 28px; max-width: 600px; box-shadow: var(--shadow);
+}
+.session-card h2 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 6px; color: var(--neu-text); }
+.session-card .subtitle { font-size: 13px; color: var(--neu-muted); margin-bottom: 24px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { margin-bottom: 14px; }
+.active-session-card {
+  background: rgba(22,163,74,0.06); border: 1px solid rgba(22,163,74,0.3);
+  border-radius: 16px; padding: 28px; max-width: 600px;
+}
+.active-session-card h2 {
+  font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700;
+  color: var(--neu-green); margin-bottom: 4px;
+}
+.session-timer {
+  font-family: 'Syne', sans-serif; font-size: 48px; font-weight: 800;
+  color: var(--neu-green); letter-spacing: 0.04em; margin: 20px 0;
+}
+.session-detail {
+  display: flex; justify-content: space-between; padding: 10px 0;
+  border-bottom: 1px solid var(--neu-border); font-size: 13px;
+}
+.session-detail:last-of-type { border-bottom: none; }
+.detail-label { color: var(--neu-muted); }
+
+/* ======== TABLES ======== */
+.table-card {
+  background: var(--neu-card); border: 1px solid var(--neu-border);
+  border-radius: 14px; overflow: hidden; margin-bottom: 24px; box-shadow: var(--shadow);
+}
+.table-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--neu-border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--neu-card);
+}
+.table-header h3 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--neu-text); }
+.search-input {
+  background: var(--neu-dark); border: 1px solid var(--neu-border);
+  border-radius: 8px; padding: 8px 12px; color: var(--neu-text);
+  font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none;
+  width: 200px; transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--neu-red); }
+table { width: 100%; border-collapse: collapse; }
+th {
+  background: var(--neu-dark); padding: 11px 16px; text-align: left;
+  font-size: 11px; font-weight: 600; color: var(--neu-muted);
+  text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--neu-border);
+}
+td { padding: 11px 16px; font-size: 13px; border-bottom: 1px solid var(--neu-border); color: var(--neu-text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(0,0,0,0.02); }
+.action-btn {
+  background: none; border: 1px solid var(--neu-border); border-radius: 6px;
+  color: var(--neu-text); padding: 4px 10px; font-size: 11px;
+  cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; margin-right: 4px;
+}
+.action-btn:hover { border-color: var(--neu-red); color: var(--neu-red); }
+.action-btn.block:hover { background: rgba(204,0,0,0.08); }
+
+/* ======== CHARTS ======== */
+.chart-card {
+  background: var(--neu-card); border: 1px solid var(--neu-border);
+  border-radius: 14px; padding: 20px; margin-bottom: 24px; box-shadow: var(--shadow);
+}
+.chart-card h3 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--neu-text); }
+.bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 180px; padding: 0 4px; }
+.bar-group { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+.bar-wrap  { display: flex; align-items: flex-end; gap: 3px; height: 160px; width: 100%; justify-content: center; }
+.bar {
+  flex: 1; border-radius: 4px 4px 0 0; min-width: 12px;
+  transition: opacity 0.2s; cursor: pointer; max-width: 28px;
+}
+.bar:hover { opacity: 0.7; }
+.bar-label { font-size: 10px; color: var(--neu-muted); }
+.bar-red  { background: linear-gradient(180deg, var(--neu-red), #aa0000); }
+.bar-gold { background: linear-gradient(180deg, var(--neu-gold), #b88000); }
+.chart-legend { display: flex; gap: 16px; margin-top: 12px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--neu-muted); }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+/* ======== MODALS ======== */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+  display: none; align-items: center; justify-content: center; z-index: 100;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--neu-card); border: 1px solid var(--neu-border);
+  border-radius: 16px; padding: 28px; width: 90%; max-width: 480px;
+  animation: slideUp 0.25s ease; box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+@keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+.modal h3 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 6px; color: var(--neu-text); }
+.modal-sub { font-size: 13px; color: var(--neu-muted); margin-bottom: 20px; }
+.modal-footer { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+
+/* ======== DOCS ======== */
+.code-block {
+  background: #1E1E1E; border: 1px solid #333;
+  border-radius: 10px; padding: 16px;
+  font-family: 'Courier New', monospace; font-size: 12px; color: #d4d4d4;
+  overflow-x: auto; margin-bottom: 16px; line-height: 1.6; white-space: pre;
+}
+.docs-section { max-width: 800px; }
+.docs-section h2 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 8px; color: var(--neu-text); }
+.docs-section .intro { font-size: 14px; color: var(--neu-muted); margin-bottom: 28px; line-height: 1.6; }
+.docs-part {
+  background: var(--neu-card); border: 1px solid var(--neu-border);
+  border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow);
+}
+.docs-part h3 {
+  font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px; color: var(--neu-text);
+}
+.docs-part p { font-size: 13px; color: var(--neu-muted); line-height: 1.7; margin-bottom: 10px; }
+.step-num {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--neu-red), #aa0000);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
+}
+
+/* ======== TOAST ======== */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--neu-card); border: 1px solid var(--neu-border);
+  border-radius: 12px; padding: 14px 18px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  transform: translateY(80px); opacity: 0; transition: all 0.3s;
+  z-index: 200; min-width: 280px; max-width: 360px;
+}
+.toast.show    { transform: translateY(0); opacity: 1; }
+.toast-icon    { font-size: 20px; }
+.toast-text    { font-size: 13px; line-height: 1.4; color: var(--neu-text); }
+.toast-title   { font-weight: 600; }
+.toast.success { border-color: rgba(22,163,74,0.4); }
+.toast.error   { border-color: rgba(204,0,0,0.4); }
+
+/* ======== EXPORT BAR ======== */
+.export-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+
+/* ======== BLOCKED PAGE ======== */
+.blocked-card {
+  background: var(--neu-card); border: 1px solid rgba(204,0,0,0.3);
+  border-radius: 16px; padding: 40px; text-align: center; max-width: 400px;
+  box-shadow: var(--shadow);
+}
+.blocked-icon { font-size: 48px; margin-bottom: 16px; }
+.blocked-card h2 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: var(--neu-red); }
+.blocked-card p  { font-size: 13px; color: var(--neu-muted); margin-top: 8px; }
+
+/* ======== RESPONSIVE ======== */
+@media(max-width: 768px) {
+  .sidebar { display: none; }
+  .form-row { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ======== SCROLLBAR ======== */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--neu-border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toast-icon">✅</span>
+  <div class="toast-text">
+    <div class="toast-title" id="toast-title"></div>
+    <div id="toast-msg"></div>
+  </div>
+</div>
+
+<!-- ===== LOGIN PAGE ===== -->
+<div class="page active" id="page-login">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-badge">NEU</div>
+      <h1>Laboratory Usage Log</h1>
+      <p>New Era University</p>
+    </div>
+    <div class="login-tabs">
+      <button class="login-tab active" onclick="switchLoginTab('google', event)">🔑 Google Login</button>
+      <button class="login-tab" onclick="switchLoginTab('qr', event)">📱 QR Code</button>
+    </div>
+
+    <!-- Google Tab -->
+    <div id="tab-google">
+      <p style="font-size:12px;color:var(--neu-muted);margin-bottom:14px;text-align:center;">
+        Sign in with your <strong style="color:var(--neu-red)">@neu.edu.ph</strong> Google account
+      </p>
+      <button class="btn btn-google" onclick="simulateGoogleLogin()">
+        <svg width="18" height="18" viewBox="0 0 48 48">
+          <path fill="#4285F4" d="M47.5 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.3 5.5-4.9 7.2v6h7.9c4.6-4.3 7.3-10.5 7.3-17.3z"/>
+          <path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.9-6c-2.1 1.4-4.8 2.3-8 2.3-6.1 0-11.3-4.1-13.2-9.7H2.7v6.2C6.7 42.9 14.8 48 24 48z"/>
+          <path fill="#FBBC05" d="M10.8 28.8c-.5-1.4-.7-2.9-.7-4.4s.2-3 .7-4.4v-6.2H2.7C1 17.1 0 20.4 0 24s1 6.9 2.7 9.9l8.1-5.1z"/>
+          <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.5l6.8-6.8C35.9 2.3 30.4 0 24 0 14.8 0 6.7 5.1 2.7 12.5l8.1 6.2C12.7 13.6 17.9 9.5 24 9.5z"/>
+        </svg>
+        Continue with Google
+      </button>
+      <div class="divider">or log in as demo</div>
+      <button class="btn btn-gold btn-sm" style="margin-bottom:8px" onclick="demoLogin('professor')">👨‍🏫 Demo Professor Login</button>
+      <button class="btn btn-outline btn-sm" style="border:1px solid #2563EB;color:#2563EB" onclick="demoLogin('admin')">🛡️ Demo Admin Login</button>
+      <div class="alert error" id="login-error">⛔ Only @neu.edu.ph emails are allowed.</div>
+    </div>
+
+    <!-- QR Tab -->
+    <div id="tab-qr" class="hidden qr-panel">
+      <div class="qr-box">
+        <div class="qr-icon">▦</div>
+        <p>QR Code Scanner</p>
+      </div>
+      <p style="font-size:12px;color:var(--neu-muted);margin-bottom:14px">
+        Point your camera at the NEU-issued QR code or enter your faculty ID below.
+      </p>
+      <input class="input-field" id="qr-id-input" placeholder="Enter Faculty ID (e.g. NEU-12345)" />
+      <button class="btn btn-primary" onclick="simulateQRLogin()">🔍 Verify & Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BLOCKED PAGE ===== -->
+<div class="page" id="page-blocked" style="align-items:center;justify-content:center;padding:24px;background:var(--neu-dark);">
+  <div class="blocked-card">
+    <div class="blocked-icon">🚫</div>
+    <h2>Account Blocked</h2>
+    <p>Your account has been blocked by an administrator. Please contact IT at
+      <strong style="color:var(--neu-red)">it@neu.edu.ph</strong> for assistance.
+    </p>
+    <button class="btn btn-outline" style="margin-top:20px" onclick="showPage('page-login')">← Back to Login</button>
+  </div>
+</div>
+
+<!-- ===== PROFESSOR APP ===== -->
+<div class="page" id="page-professor">
+  <div class="app-layout">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-badge">NEU</div>
+        <div>
+          <div class="sidebar-logo-text">Lab Usage Log</div>
+          <div class="sidebar-logo-sub">Professor Portal</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">Session</div>
+        <div class="nav-item active" onclick="showPanel('panel-session', this)"><span class="nav-icon">🧪</span> Session Log</div>
+        <div class="nav-item" onclick="showPanel('panel-my-logs', this)"><span class="nav-icon">📋</span> My History</div>
+        <div class="nav-section">Info</div>
+        <div class="nav-item" onclick="showPanel('panel-rooms-prof', this)"><span class="nav-icon">🏫</span> Room Status</div>
+        <div class="nav-item" onclick="showPanel('panel-docs', this)"><span class="nav-icon">📖</span> Documentation</div>
+      </nav>
+      <div class="sidebar-user">
+        <div class="avatar" id="prof-avatar">JD</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="prof-name">Prof. Juan Dela Cruz</div>
+          <div class="sidebar-user-role">Professor</div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()" title="Logout">⏏</button>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title" id="prof-panel-title">Session Log</div>
+        <div class="topbar-right">
+          <button class="theme-btn" id="prof-theme-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+          <span class="badge badge-green" id="session-status-badge">● No Active Session</span>
+          <span id="live-clock" style="font-size:12px;color:var(--neu-muted);font-family:'Syne',sans-serif;"></span>
+        </div>
+      </div>
+
+      <!-- Panel: Session Log -->
+      <div class="content-panel active" id="panel-session">
+        <div id="start-session-area">
+          <div class="session-card">
+            <h2>Start Lab Session</h2>
+            <p class="subtitle">Fill in your class details to log room usage.</p>
+            <div class="form-group">
+              <label>Room Number</label>
+              <select class="input-field" id="form-room">
+                <option value="">— Select Room —</option>
+                <option>Lab 101 – ICT Building</option>
+                <option>Lab 102 – ICT Building</option>
+                <option>Lab 201 – Science Bldg</option>
+                <option>Lab 202 – Science Bldg</option>
+                <option>Lab 301 – Engineering</option>
+                <option>Lab 302 – Engineering</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>College</label>
+                <select class="input-field" id="form-college">
+                  <option value="">— Select —</option>
+                  <option>CITCS</option><option>CAS</option>
+                  <option>CBA</option><option>COE</option><option>CON</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Program</label>
+                <select class="input-field" id="form-program">
+                  <option value="">— Select —</option>
+                  <option>BS Computer Science</option>
+                  <option>BS Information Technology</option>
+                  <option>BS Electronics Eng.</option>
+                  <option>BS Nursing</option>
+                  <option>AB Psychology</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Section</label>
+                <input class="input-field" id="form-section" placeholder="e.g. 3-A" />
+              </div>
+              <div class="form-group">
+                <label>Track / Subject</label>
+                <input class="input-field" id="form-track" placeholder="e.g. Programming 2" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Start Time (Auto-filled)</label>
+              <input class="input-field" id="form-start-time" readonly style="color:var(--neu-red);cursor:not-allowed" />
+            </div>
+            <button class="btn btn-primary" onclick="startSession()">▶ Start Session</button>
+          </div>
+        </div>
+
+        <div id="active-session-area" class="hidden">
+          <div class="active-session-card">
+            <h2>🟢 Session Active</h2>
+            <p style="font-size:13px;color:var(--neu-muted)" id="active-room-name"></p>
+            <div class="session-timer" id="session-timer">00:00:00</div>
+            <div class="session-detail"><span class="detail-label">Professor</span><span id="a-prof"></span></div>
+            <div class="session-detail"><span class="detail-label">Room</span><span id="a-room"></span></div>
+            <div class="session-detail"><span class="detail-label">College / Program</span><span id="a-college-prog"></span></div>
+            <div class="session-detail"><span class="detail-label">Section</span><span id="a-section"></span></div>
+            <div class="session-detail"><span class="detail-label">Track</span><span id="a-track"></span></div>
+            <div class="session-detail"><span class="detail-label">Start Time</span><span id="a-start"></span></div>
+            <div style="margin-top:20px">
+              <button class="btn btn-danger btn-sm" onclick="confirmEndSession()">⏹ End Session</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: My Logs -->
+      <div class="content-panel" id="panel-my-logs">
+        <div class="table-card">
+          <div class="table-header">
+            <h3>📋 My Session History</h3>
+            <input type="text" class="search-input" placeholder="Search by room..." oninput="filterMyLogs(this.value)" />
+          </div>
+          <table>
+            <thead><tr><th>Room</th><th>Date</th><th>Start</th><th>End</th><th>Duration</th><th>Program</th><th>Section</th></tr></thead>
+            <tbody id="my-logs-tbody">
+              <tr><td>Lab 101</td><td>Mar 13, 2026</td><td>08:00 AM</td><td>10:00 AM</td><td>2h 00m</td><td>BSCS</td><td>3-A</td></tr>
+              <tr><td>Lab 202</td><td>Mar 12, 2026</td><td>01:00 PM</td><td>03:00 PM</td><td>2h 00m</td><td>BSIT</td><td>2-B</td></tr>
+              <tr><td>Lab 101</td><td>Mar 11, 2026</td><td>10:00 AM</td><td>12:00 PM</td><td>2h 00m</td><td>BSCS</td><td>3-A</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Panel: Room Status -->
+      <div class="content-panel" id="panel-rooms-prof">
+        <h3 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;color:var(--neu-text)">🏫 Room Availability</h3>
+        <div class="rooms-grid" id="rooms-grid-prof"></div>
+      </div>
+
+      <!-- Panel: Documentation -->
+      <div class="content-panel" id="panel-docs">
+        <div class="docs-section">
+          <h2>📖 System Documentation</h2>
+          <p class="intro">Developer guide and Firebase code snippets for the NEU Lab Usage Log system.</p>
+          <div class="docs-part">
+            <h3><span class="step-num">1</span> Firebase Initialization</h3>
+            <p>Install Firebase SDK and configure your project. Save as <code>firebase.js</code>.</p>
+            <pre class="code-block">import { initializeApp } from 'firebase/app';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "neu-lab-log.firebaseapp.com",
+  projectId: "neu-lab-log",
+};
+
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const googleProvider = new GoogleAuthProvider();</pre>
+          </div>
+          <div class="docs-part">
+            <h3><span class="step-num">2</span> Google Auth (NEU Domain Restriction)</h3>
+            <pre class="code-block">async function loginWithGoogle() {
+  const result = await signInWithPopup(auth, googleProvider);
+  const email = result.user.email;
+  if (!email.endsWith('@neu.edu.ph')) {
+    await auth.signOut();
+    throw new Error('Only @neu.edu.ph accounts allowed');
+  }
+  const userDoc = await getDoc(doc(db, 'users', result.user.uid));
+  if (userDoc.data()?.blocked) throw new Error('Account is blocked');
+  return result.user;
+}</pre>
+          </div>
+          <div class="docs-part">
+            <h3><span class="step-num">3</span> Firestore Structure</h3>
+            <pre class="code-block">// users/{uid}
+{ name, email, role: "professor"|"admin", blocked: false }
+
+// rooms/{roomId}
+{ roomNumber, building, isOccupied: false, currentLogId: null }
+
+// logs/{logId}
+{ professorId, professorName, roomNumber,
+  startTime, endTime, college, program,
+  section, track, status: "active"|"completed" }</pre>
+          </div>
+          <div class="docs-part">
+            <h3><span class="step-num">4</span> Start & End Session</h3>
+            <pre class="code-block">// Start Session
+const logRef = await addDoc(collection(db, 'logs'), {
+  ...formData, professorId: auth.currentUser.uid,
+  startTime: serverTimestamp(), status: 'active'
+});
+await updateDoc(doc(db, 'rooms', roomId), {
+  isOccupied: true, currentLogId: logRef.id
+});
+
+// End Session
+await updateDoc(doc(db, 'logs', logId), {
+  endTime: serverTimestamp(), status: 'completed'
+});
+await updateDoc(doc(db, 'rooms', roomId), {
+  isOccupied: false, currentLogId: null
+});</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADMIN APP ===== -->
+<div class="page" id="page-admin">
+  <div class="app-layout">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-badge">NEU</div>
+        <div>
+          <div class="sidebar-logo-text">Lab Usage Log</div>
+          <div class="sidebar-logo-sub">Admin Dashboard</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">Overview</div>
+        <div class="nav-item active" onclick="showAdminPanel('panel-dashboard', this)"><span class="nav-icon">📊</span> Dashboard</div>
+        <div class="nav-item" onclick="showAdminPanel('panel-rooms', this)"><span class="nav-icon">🏫</span> Rooms</div>
+        <div class="nav-section">Management</div>
+        <div class="nav-item" onclick="showAdminPanel('panel-logs', this)"><span class="nav-icon">📋</span> All Logs</div>
+        <div class="nav-item" onclick="showAdminPanel('panel-professors', this)"><span class="nav-icon">👥</span> Professors</div>
+        <div class="nav-item" onclick="showAdminPanel('panel-reports', this)"><span class="nav-icon">📁</span> Reports</div>
+      </nav>
+      <div class="sidebar-user">
+        <div class="avatar" style="background:linear-gradient(135deg,#2563EB,#1d4ed8)">AD</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">Admin User</div>
+          <div class="sidebar-user-role">Administrator</div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()" title="Logout">⏏</button>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title" id="admin-panel-title">Dashboard</div>
+        <div class="topbar-right">
+          <button class="theme-btn" id="admin-theme-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+          <span class="badge badge-blue">Admin View</span>
+          <span id="admin-clock" style="font-size:12px;color:var(--neu-muted);font-family:'Syne',sans-serif;"></span>
+        </div>
+      </div>
+
+      <!-- Panel: Dashboard -->
+      <div class="content-panel active" id="panel-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card red">
+            <div class="stat-icon">🧪</div>
+            <div class="stat-value">128</div>
+            <div class="stat-label">Total Sessions</div>
+            <div class="stat-change stat-up">↑ 12% this week</div>
+          </div>
+          <div class="stat-card gold">
+            <div class="stat-icon">⏱️</div>
+            <div class="stat-value">247h</div>
+            <div class="stat-label">Total Hours Logged</div>
+            <div class="stat-change stat-up">↑ 8% this week</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-icon">🏫</div>
+            <div class="stat-value">3</div>
+            <div class="stat-label">Rooms Active Now</div>
+            <div class="stat-change" style="color:var(--neu-muted)">of 6 total rooms</div>
+          </div>
+          <div class="stat-card blue">
+            <div class="stat-icon">👨‍🏫</div>
+            <div class="stat-value">34</div>
+            <div class="stat-label">Professors Registered</div>
+            <div class="stat-change stat-up">↑ 2 new this month</div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>📈 Room Usage — This Week</h3>
+          <div class="bar-chart" id="usage-chart"></div>
+          <div class="chart-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--neu-red)"></div>Morning Sessions</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--neu-gold)"></div>Afternoon Sessions</div>
+          </div>
+        </div>
+        <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:12px;color:var(--neu-text)">🏫 Live Room Status</h3>
+        <div class="rooms-grid" id="rooms-grid-admin"></div>
+      </div>
+
+      <!-- Panel: Manage Rooms -->
+      <div class="content-panel" id="panel-rooms">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h3 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--neu-text)">🏫 Manage Rooms</h3>
+          <button class="btn btn-primary btn-sm" onclick="openAddRoomModal()">+ Add Room</button>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead><tr><th>Room</th><th>Building</th><th>Status</th><th>Current User</th><th>Actions</th></tr></thead>
+            <tbody id="rooms-table-body">
+              <tr><td><strong>Lab 101</strong></td><td>ICT Building</td><td><span class="badge badge-green">Free</span></td><td>—</td><td><button class="action-btn">Edit</button><button class="action-btn block">Delete</button></td></tr>
+              <tr><td><strong>Lab 102</strong></td><td>ICT Building</td><td><span class="badge badge-red">Occupied</span></td><td>Prof. Santos</td><td><button class="action-btn">Edit</button><button class="action-btn block">Delete</button></td></tr>
+              <tr><td><strong>Lab 201</strong></td><td>Science Bldg</td><td><span class="badge badge-red">Occupied</span></td><td>Prof. Reyes</td><td><button class="action-btn">Edit</button><button class="action-btn block">Delete</button></td></tr>
+              <tr><td><strong>Lab 202</strong></td><td>Science Bldg</td><td><span class="badge badge-green">Free</span></td><td>—</td><td><button class="action-btn">Edit</button><button class="action-btn block">Delete</button></td></tr>
+              <tr><td><strong>Lab 301</strong></td><td>Engineering</td><td><span class="badge badge-red">Occupied</span></td><td>Prof. Garcia</td><td><button class="action-btn">Edit</button><button class="action-btn block">Delete</button></td></tr>
+              <tr><td><strong>Lab 302</strong></td><td>Engineering</td><td><span class="badge badge-green">Free</span></td><td>—</td><td><button class="action-btn">Edit</button><button class="action-btn block">Delete</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Panel: All Logs -->
+      <div class="content-panel" id="panel-logs">
+        <div class="export-bar">
+          <button class="btn btn-outline btn-sm" onclick="exportCSV()">⬇ Export CSV</button>
+          <button class="btn btn-outline btn-sm" onclick="exportPDF()">🖨 Export PDF</button>
+          <input type="date" class="search-input" style="width:140px" id="filter-date" />
+          <input type="text" class="search-input" id="filter-professor" placeholder="Filter by professor..." oninput="filterLogs()" />
+          <select class="search-input" style="width:160px" id="filter-room" onchange="filterLogs()">
+            <option value="">All Rooms</option>
+            <option>Lab 101</option><option>Lab 102</option>
+            <option>Lab 201</option><option>Lab 202</option>
+            <option>Lab 301</option><option>Lab 302</option>
+          </select>
+        </div>
+        <div class="table-card">
+          <div class="table-header">
+            <h3>All Session Logs</h3>
+            <span class="badge badge-gold" id="log-count">6 records</span>
+          </div>
+          <table>
+            <thead><tr><th>Professor</th><th>Room</th><th>Date</th><th>Start</th><th>End</th><th>Duration</th><th>College</th><th>Section</th><th>Status</th></tr></thead>
+            <tbody id="all-logs-tbody">
+              <tr><td>Juan Dela Cruz</td><td>Lab 101</td><td>Mar 13</td><td>08:00 AM</td><td>10:00 AM</td><td>2h 00m</td><td>CITCS</td><td>3-A</td><td><span class="badge badge-green">Completed</span></td></tr>
+              <tr><td>Maria Santos</td><td>Lab 102</td><td>Mar 13</td><td>09:00 AM</td><td>—</td><td>—</td><td>COE</td><td>4-B</td><td><span class="badge badge-red">Active</span></td></tr>
+              <tr><td>Pedro Reyes</td><td>Lab 201</td><td>Mar 13</td><td>10:00 AM</td><td>—</td><td>—</td><td>CAS</td><td>2-C</td><td><span class="badge badge-red">Active</span></td></tr>
+              <tr><td>Ana Garcia</td><td>Lab 301</td><td>Mar 13</td><td>07:30 AM</td><td>—</td><td>—</td><td>CON</td><td>1-A</td><td><span class="badge badge-red">Active</span></td></tr>
+              <tr><td>Juan Dela Cruz</td><td>Lab 202</td><td>Mar 12</td><td>01:00 PM</td><td>03:00 PM</td><td>2h 00m</td><td>CITCS</td><td>3-A</td><td><span class="badge badge-green">Completed</span></td></tr>
+              <tr><td>Maria Santos</td><td>Lab 101</td><td>Mar 12</td><td>08:00 AM</td><td>10:00 AM</td><td>2h 00m</td><td>COE</td><td>4-B</td><td><span class="badge badge-green">Completed</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Panel: Professors -->
+      <div class="content-panel" id="panel-professors">
+        <div class="table-card">
+          <div class="table-header">
+            <h3>👥 Professor Accounts</h3>
+            <input type="text" class="search-input" placeholder="Search professor..." />
+          </div>
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>College</th><th>Sessions</th><th>Last Active</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Juan Dela Cruz</strong></td><td>juan.delacruz@neu.edu.ph</td><td>CITCS</td><td>18</td><td>Today</td><td><span class="badge badge-green">Active</span></td><td><button class="action-btn block" onclick="blockProfessor(this, 'Juan Dela Cruz')">Block</button></td></tr>
+              <tr><td><strong>Maria Santos</strong></td><td>maria.santos@neu.edu.ph</td><td>COE</td><td>24</td><td>Today</td><td><span class="badge badge-green">Active</span></td><td><button class="action-btn block" onclick="blockProfessor(this, 'Maria Santos')">Block</button></td></tr>
+              <tr><td><strong>Pedro Reyes</strong></td><td>pedro.reyes@neu.edu.ph</td><td>CAS</td><td>9</td><td>Today</td><td><span class="badge badge-green">Active</span></td><td><button class="action-btn block" onclick="blockProfessor(this, 'Pedro Reyes')">Block</button></td></tr>
+              <tr><td><strong>Ana Garcia</strong></td><td>ana.garcia@neu.edu.ph</td><td>CON</td><td>15</td><td>Today</td><td><span class="badge badge-green">Active</span></td><td><button class="action-btn block" onclick="blockProfessor(this, 'Ana Garcia')">Block</button></td></tr>
+              <tr><td><strong>Luis Torres</strong></td><td>luis.torres@neu.edu.ph</td><td>CBA</td><td>4</td><td>Mar 10</td><td><span class="badge badge-red">Blocked</span></td><td><button class="action-btn" onclick="unblockProfessor(this, 'Luis Torres')">Unblock</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Panel: Reports -->
+      <div class="content-panel" id="panel-reports">
+        <div class="docs-section">
+          <h2>📁 Reports & Export</h2>
+          <p class="intro">Generate and export usage reports from Firestore data.</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px">
+            <div class="stat-card blue" style="cursor:pointer" onclick="exportCSV()">
+              <div class="stat-icon">📊</div>
+              <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--neu-text)">Export CSV</div>
+              <p style="font-size:12px;color:var(--neu-muted);margin-top:6px">Download all logs as a spreadsheet</p>
+            </div>
+            <div class="stat-card gold" style="cursor:pointer" onclick="exportPDF()">
+              <div class="stat-icon">🖨️</div>
+              <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--neu-text)">Export PDF</div>
+              <p style="font-size:12px;color:var(--neu-muted);margin-top:6px">Download printable PDF report</p>
+            </div>
+            <div class="stat-card green" style="cursor:pointer">
+              <div class="stat-icon">📧</div>
+              <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--neu-text)">Email Report</div>
+              <p style="font-size:12px;color:var(--neu-muted);margin-top:6px">Send weekly report to admin email</p>
+            </div>
+          </div>
+          <div class="chart-card">
+            <h3>📈 Monthly Usage Overview</h3>
+            <div class="bar-chart" id="monthly-chart"></div>
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--neu-red)"></div>Morning Sessions</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--neu-gold)"></div>Afternoon Sessions</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+<div class="modal-overlay" id="modal-end-session">
+  <div class="modal">
+    <h3>⏹ End Session?</h3>
+    <p class="modal-sub">You are about to end your current session. The end time will be recorded.</p>
+    <div style="background:var(--neu-dark);border-radius:10px;padding:14px;font-size:13px;line-height:1.8;color:var(--neu-text)">
+      <strong id="modal-room-name"></strong><br/>
+      <span style="color:var(--neu-muted)">Duration: </span><span id="modal-duration"></span>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-end-session')">Cancel</button>
+      <button class="btn btn-danger btn-sm" onclick="endSession()">Confirm End Session</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-add-room">
+  <div class="modal">
+    <h3>➕ Add New Room</h3>
+    <p class="modal-sub">Register a new lab room in the system.</p>
+    <label>Room Number / Name</label>
+    <input class="input-field" id="new-room-number" placeholder="e.g. Lab 303" />
+    <label>Building</label>
+    <select class="input-field" id="new-room-building">
+      <option>ICT Building</option>
+      <option>Science Bldg</option>
+      <option>Engineering</option>
+      <option>Main Building</option>
+    </select>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-add-room')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="addRoom()">Add Room</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  STATE
+// ============================================================
+let currentUser   = null;
+let sessionActive = false;
+let sessionData   = {};
+let sessionStart  = null;
+let timerInterval = null;
+let clockInterval = null;
+let isDarkMode    = false;
+
+const ROOMS = [
+  { id: 'r1', number: 'Lab 101', building: 'ICT Building', occupied: false, professor: null,          time: null      },
+  { id: 'r2', number: 'Lab 102', building: 'ICT Building', occupied: true,  professor: 'Prof. Santos', time: '1h 22m' },
+  { id: 'r3', number: 'Lab 201', building: 'Science Bldg', occupied: true,  professor: 'Prof. Reyes',  time: '0h 45m' },
+  { id: 'r4', number: 'Lab 202', building: 'Science Bldg', occupied: false, professor: null,          time: null      },
+  { id: 'r5', number: 'Lab 301', building: 'Engineering',  occupied: true,  professor: 'Prof. Garcia', time: '2h 10m' },
+  { id: 'r6', number: 'Lab 302', building: 'Engineering',  occupied: false, professor: null,          time: null      },
+];
+
+// ============================================================
+//  DARK MODE TOGGLE
+// ============================================================
+function toggleDarkMode() {
+  isDarkMode = !isDarkMode;
+  document.documentElement.classList.toggle('dark', isDarkMode);
+  const label = isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode';
+  document.querySelectorAll('.theme-btn').forEach(b => b.textContent = label);
+}
+
+// ============================================================
+//  PAGE ROUTING
+// ============================================================
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ============================================================
+//  LOGIN
+// ============================================================
+function switchLoginTab(tab, e) {
+  document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById('tab-google').classList.toggle('hidden', tab !== 'google');
+  document.getElementById('tab-qr').classList.toggle('hidden', tab !== 'qr');
+}
+
+function simulateGoogleLogin() {
+  const email = prompt('Enter your NEU email to test login:', 'juan.delacruz@neu.edu.ph');
+  if (!email) return;
+  if (!email.endsWith('@neu.edu.ph')) {
+    const el = document.getElementById('login-error');
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 3000);
+    return;
+  }
+  loginAs('professor', email);
+}
+
+function demoLogin(role) {
+  if (role === 'professor') loginAs('professor', 'juan.delacruz@neu.edu.ph');
+  else loginAs('admin', 'admin@neu.edu.ph');
+}
+
+function simulateQRLogin() {
+  const id = document.getElementById('qr-id-input').value.trim().toUpperCase();
+  const validIDs = ['NEU-12345', 'NEU-67890', 'NEU-11111'];
+  if (!validIDs.includes(id)) {
+    showToast('error', '❌ Invalid ID', 'Faculty ID not found in system.');
+    return;
+  }
+  loginAs('professor', 'juan.delacruz@neu.edu.ph');
+}
+
+function loginAs(role, email) {
+  currentUser = { name: role === 'admin' ? 'Admin User' : 'Juan Dela Cruz', email, role };
+  if (role === 'professor') {
+    document.getElementById('prof-name').textContent = 'Prof. Juan Dela Cruz';
+    document.getElementById('prof-avatar').textContent = 'JD';
+    updateStartTime();
+    renderRoomsGrid('rooms-grid-prof');
+    startClock('live-clock');
+    showPage('page-professor');
+    showToast('success', '✅ Logged In', 'Welcome, Prof. Juan Dela Cruz!');
+  } else {
+    renderRoomsGrid('rooms-grid-admin');
+    renderChart('usage-chart', 'week');
+    renderChart('monthly-chart', 'month');
+    startClock('admin-clock');
+    showPage('page-admin');
+    showToast('success', '✅ Admin Access', 'Welcome back, Administrator!');
+  }
+}
+
+function doLogout() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  if (clockInterval) { clearInterval(clockInterval); clockInterval = null; }
+  sessionActive = false;
+  document.getElementById('start-session-area').classList.remove('hidden');
+  document.getElementById('active-session-area').classList.add('hidden');
+  showPage('page-login');
+  showToast('success', '👋 Logged Out', 'You have been signed out.');
+}
+
+// ============================================================
+//  PANEL NAVIGATION
+// ============================================================
+function showPanel(panelId, el) {
+  document.querySelectorAll('#page-professor .content-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(panelId).classList.add('active');
+  document.querySelectorAll('#page-professor .nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  const titles = { 'panel-session':'Session Log','panel-my-logs':'My History','panel-rooms-prof':'Room Status','panel-docs':'Documentation' };
+  document.getElementById('prof-panel-title').textContent = titles[panelId] || panelId;
+}
+
+function showAdminPanel(panelId, el) {
+  document.querySelectorAll('#page-admin .content-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(panelId).classList.add('active');
+  document.querySelectorAll('#page-admin .nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  const titles = { 'panel-dashboard':'Dashboard','panel-rooms':'Manage Rooms','panel-logs':'All Logs','panel-professors':'Professors','panel-reports':'Reports & Export' };
+  document.getElementById('admin-panel-title').textContent = titles[panelId] || panelId;
+}
+
+// ============================================================
+//  SESSION LOGIC
+// ============================================================
+function updateStartTime() {
+  const el = document.getElementById('form-start-time');
+  if (el) el.value = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+
+function startSession() {
+  const room    = document.getElementById('form-room').value;
+  const college = document.getElementById('form-college').value;
+  const program = document.getElementById('form-program').value;
+  const section = document.getElementById('form-section').value;
+  const track   = document.getElementById('form-track').value;
+
+  if (!room || !college || !program || !section || !track) {
+    showToast('error', '⚠ Incomplete Form', 'Please fill in all required fields.');
+    return;
+  }
+
+  sessionStart = new Date();
+  sessionData  = { room, college, program, section, track };
+  sessionActive = true;
+
+  document.getElementById('a-prof').textContent         = 'Prof. Juan Dela Cruz';
+  document.getElementById('a-room').textContent         = room;
+  document.getElementById('a-college-prog').textContent = college + ' – ' + program;
+  document.getElementById('a-section').textContent      = section;
+  document.getElementById('a-track').textContent        = track;
+  document.getElementById('a-start').textContent        = sessionStart.toLocaleTimeString();
+  document.getElementById('active-room-name').textContent = room;
+
+  document.getElementById('start-session-area').classList.add('hidden');
+  document.getElementById('active-session-area').classList.remove('hidden');
+  document.getElementById('session-status-badge').textContent = '● Active: ' + room;
+  document.getElementById('session-status-badge').className   = 'badge badge-red';
+
+  timerInterval = setInterval(updateTimer, 1000);
+  showToast('success', '🟢 Session Started', 'Room ' + room + ' is now logged as occupied.');
+}
+
+function updateTimer() {
+  const elapsed = Math.floor((new Date() - sessionStart) / 1000);
+  const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+  const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+  const s = String(elapsed % 60).padStart(2, '0');
+  document.getElementById('session-timer').textContent = h + ':' + m + ':' + s;
+}
+
+function confirmEndSession() {
+  const elapsed = Math.floor((new Date() - sessionStart) / 1000);
+  document.getElementById('modal-room-name').textContent = sessionData.room;
+  document.getElementById('modal-duration').textContent  = Math.floor(elapsed/3600) + 'h ' + Math.floor((elapsed%3600)/60) + 'm';
+  openModal('modal-end-session');
+}
+
+function endSession() {
+  clearInterval(timerInterval); timerInterval = null;
+  sessionActive = false;
+  closeModal('modal-end-session');
+  document.getElementById('start-session-area').classList.remove('hidden');
+  document.getElementById('active-session-area').classList.add('hidden');
+  document.getElementById('session-status-badge').textContent = '● No Active Session';
+  document.getElementById('session-status-badge').className   = 'badge badge-green';
+  updateStartTime();
+  showToast('success', '⏹ Session Ended', 'Thank you for using ' + sessionData.room + '. Have a great day!');
+}
+
+// ============================================================
+//  ROOMS GRID
+// ============================================================
+function renderRoomsGrid(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  let html = '';
+  for (let i = 0; i < ROOMS.length; i++) {
+    const r = ROOMS[i];
+    html += '<div class="room-card ' + (r.occupied ? 'occupied' : 'available') + '">';
+    html += '<div class="room-status-dot ' + (r.occupied ? 'dot-red' : 'dot-green') + '"></div>';
+    html += '<div class="room-number">' + r.number + '</div>';
+    html += '<div class="room-building">' + r.building + '</div>';
+    if (r.occupied) {
+      html += '<div class="room-timer">⏱ ' + r.time + '</div>';
+      html += '<div class="room-prof">' + r.professor + '</div>';
+    } else {
+      html += '<div style="font-size:11px;color:var(--neu-green);margin-top:8px">✓ Available</div>';
+    }
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+// ============================================================
+//  BAR CHART
+// ============================================================
+function renderChart(containerId, type) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const labels    = type === 'week'
+    ? ['Mon','Tue','Wed','Thu','Fri','Sat']
+    : ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const morning   = type === 'week' ? [4,6,5,8,7,3]  : [18,22,19,25,21,17,23,20,24,19,16,14];
+  const afternoon = type === 'week' ? [3,5,4,6,5,2]  : [12,15,14,18,16,12,17,14,19,15,11,10];
+  const maxVal    = Math.max.apply(null, morning.concat(afternoon));
+  let html = '';
+  for (let i = 0; i < labels.length; i++) {
+    const mh = (morning[i]   / maxVal) * 140;
+    const ah = (afternoon[i] / maxVal) * 140;
+    html += '<div class="bar-group">';
+    html += '<div class="bar-wrap">';
+    html += '<div class="bar bar-red"  style="height:' + mh + 'px" title="Morning: '   + morning[i]   + '"></div>';
+    html += '<div class="bar bar-gold" style="height:' + ah + 'px" title="Afternoon: ' + afternoon[i] + '"></div>';
+    html += '</div>';
+    html += '<div class="bar-label">' + labels[i] + '</div>';
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+// ============================================================
+//  ADMIN — PROFESSORS
+// ============================================================
+function blockProfessor(btn, name) {
+  if (!confirm('Block ' + name + '? They will not be able to log in.')) return;
+  btn.closest('tr').querySelector('td:nth-child(6)').innerHTML = '<span class="badge badge-red">Blocked</span>';
+  btn.textContent = 'Unblock';
+  btn.onclick = function(e) { unblockProfessor(e.target, name); };
+  showToast('success', '🚫 Professor Blocked', name + ' can no longer log in.');
+}
+
+function unblockProfessor(btn, name) {
+  btn.closest('tr').querySelector('td:nth-child(6)').innerHTML = '<span class="badge badge-green">Active</span>';
+  btn.textContent = 'Block';
+  btn.onclick = function(e) { blockProfessor(e.target, name); };
+  showToast('success', '✅ Professor Unblocked', name + ' can now log in again.');
+}
+
+// ============================================================
+//  ADMIN — ROOMS
+// ============================================================
+function openAddRoomModal() { openModal('modal-add-room'); }
+
+function addRoom() {
+  const num  = document.getElementById('new-room-number').value.trim();
+  const bldg = document.getElementById('new-room-building').value;
+  if (!num) { showToast('error', '⚠ Required', 'Please enter a room number.'); return; }
+  const row = document.getElementById('rooms-table-body').insertRow(0);
+  row.innerHTML = '<td><strong>' + num + '</strong></td><td>' + bldg + '</td><td><span class="badge badge-green">Free</span></td><td>—</td><td><button class="action-btn">Edit</button><button class="action-btn block">Delete</button></td>';
+  document.getElementById('new-room-number').value = '';
+  closeModal('modal-add-room');
+  showToast('success', '🏫 Room Added', num + ' has been added to the system.');
+}
+
+// ============================================================
+//  EXPORT
+// ============================================================
+function exportCSV() {
+  const headers = ['Professor','Room','Date','Start','End','Duration','College','Section','Status'];
+  const rows = [headers];
+  document.querySelectorAll('#all-logs-tbody tr').forEach(function(tr) {
+    const cells = Array.from(tr.querySelectorAll('td')).map(function(td) { return td.textContent.trim(); });
+    rows.push(cells.slice(0, 9));
+  });
+  const csv  = rows.map(function(r) { return r.join(','); }).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'NEU_Lab_Logs.csv';
+  a.click();
+  showToast('success', '⬇ CSV Exported', 'NEU_Lab_Logs.csv has been downloaded.');
+}
+
+function exportPDF() {
+  window.print();
+  showToast('success', '🖨 PDF Ready', 'Print dialog opened for PDF export.');
+}
+
+// ============================================================
+//  FILTERS
+// ============================================================
+function filterLogs() {
+  const prof = document.getElementById('filter-professor').value.toLowerCase();
+  const room = document.getElementById('filter-room').value;
+  let count  = 0;
+  document.querySelectorAll('#all-logs-tbody tr').forEach(function(tr) {
+    const tds = tr.querySelectorAll('td');
+    const profMatch = !prof || tds[0].textContent.toLowerCase().includes(prof);
+    const roomMatch = !room || tds[1].textContent.includes(room);
+    tr.style.display = profMatch && roomMatch ? '' : 'none';
+    if (profMatch && roomMatch) count++;
+  });
+  document.getElementById('log-count').textContent = count + ' records';
+}
+
+function filterMyLogs(val) {
+  const v = val.toLowerCase();
+  document.querySelectorAll('#my-logs-tbody tr').forEach(function(tr) {
+    tr.style.display = !v || tr.textContent.toLowerCase().includes(v) ? '' : 'none';
+  });
+}
+
+// ============================================================
+//  MODALS
+// ============================================================
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ============================================================
+//  TOAST
+// ============================================================
+function showToast(type, title, msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-msg').textContent   = msg;
+  toast.className = 'toast ' + type + ' show';
+  setTimeout(function() { toast.classList.remove('show'); }, 3500);
+}
+
+// ============================================================
+//  CLOCK
+// ============================================================
+function startClock(id) {
+  if (clockInterval) clearInterval(clockInterval);
+  const el = document.getElementById(id);
+  clockInterval = setInterval(function() {
+    if (el) el.textContent = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  }, 1000);
+}
+
+// ============================================================
+//  INIT
+// ============================================================
+setInterval(updateStartTime, 1000);
+</script>
+</body>
+</html>
