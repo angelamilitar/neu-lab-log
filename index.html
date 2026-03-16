@@ -1802,15 +1802,17 @@ function setupProfessorPortal() {
 
 function showMyProfile() {
   if (!currentUser) return;
-  const nameEl = document.getElementById('profile-name-large');
-  const emailEl = document.getElementById('profile-email-large');
-  const photoEl = document.getElementById('profile-photo-large');
-  const collegeEl = document.getElementById('profile-college');
-  const programEl = document.getElementById('profile-program');
-  if (nameEl) nameEl.textContent = 'Prof. ' + currentUser.name;
-  if (emailEl) emailEl.textContent = currentUser.email;
-  if (collegeEl) collegeEl.textContent = currentUser.college || '—';
-  if (programEl) programEl.textContent = currentUser.program || '—';
+  const nameEl        = document.getElementById('profile-name-large');
+  const emailEl       = document.getElementById('profile-email-large');
+  const emailDetailEl = document.getElementById('profile-email-detail');
+  const photoEl       = document.getElementById('profile-photo-large');
+  const collegeEl     = document.getElementById('profile-college');
+  const programEl     = document.getElementById('profile-program');
+  if (nameEl)        nameEl.textContent        = 'Prof. ' + currentUser.name;
+  if (emailEl)       emailEl.textContent       = currentUser.email;
+  if (emailDetailEl) emailDetailEl.textContent = currentUser.email;
+  if (collegeEl)     collegeEl.textContent     = currentUser.college || '—';
+  if (programEl)     programEl.textContent     = currentUser.program || '—';
   if (photoEl) {
     if (currentUser.photo) {
       photoEl.innerHTML = '<img src="' + currentUser.photo + '" style="width:100%;height:100%;object-fit:cover"/>';
