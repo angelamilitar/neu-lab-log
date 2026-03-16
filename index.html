@@ -578,9 +578,8 @@ tr:hover td { background: rgba(0,0,0,0.02); }
         <div class="nav-item" onclick="showPanel('panel-my-logs', this)"><span class="nav-icon">📋</span> My History</div>
         <div class="nav-section">Info</div>
         <div class="nav-item" onclick="showPanel('panel-rooms-prof', this)"><span class="nav-icon">🏫</span> Room Status</div>
-        <div class="nav-item" onclick="showPanel('panel-docs', this)"><span class="nav-icon">📖</span> Documentation</div>
-<div class="nav-section">My Account</div>
-<div class="nav-item" onclick="showPanel('panel-qr', this)"><span class="nav-icon">📱</span> My QR Code</div>
+        <div class="nav-section">My Account</div>
+        <div class="nav-item" onclick="showPanel('panel-profile', this)"><span class="nav-icon">👤</span> My Profile</div>
       </nav>
       <div class="sidebar-user">
         <div class="avatar" id="prof-avatar">JD</div>
@@ -623,22 +622,11 @@ tr:hover td { background: rgba(0,0,0,0.02); }
             <div class="form-row">
               <div class="form-group">
                 <label>College</label>
-                <select class="input-field" id="form-college">
-                  <option value="">— Select —</option>
-                  <option>CITCS</option><option>CAS</option>
-                  <option>CBA</option><option>COE</option><option>CON</option>
-                </select>
+                <input class="input-field" id="form-college" readonly style="cursor:not-allowed;color:var(--neu-muted)" placeholder="Auto-filled from your profile" />
               </div>
               <div class="form-group">
                 <label>Program</label>
-                <select class="input-field" id="form-program">
-                  <option value="">— Select —</option>
-                  <option>BS Computer Science</option>
-                  <option>BS Information Technology</option>
-                  <option>BS Electronics Eng.</option>
-                  <option>BS Nursing</option>
-                  <option>AB Psychology</option>
-                </select>
+                <input class="input-field" id="form-program" readonly style="cursor:not-allowed;color:var(--neu-muted)" placeholder="Auto-filled from your profile" />
               </div>
             </div>
             <div class="form-row">
@@ -701,93 +689,36 @@ tr:hover td { background: rgba(0,0,0,0.02); }
         <div class="rooms-grid" id="rooms-grid-prof"></div>
       </div>
 
-<!-- Panel: Documentation -->
-      <div class="content-panel" id="panel-docs">
-        <div class="docs-section">
-          <h2>📖 System Documentation</h2>
-          <p class="intro">Developer guide and Firebase code snippets for the NEU Lab Usage Log system.</p>
-          <div class="docs-part">
-            <h3><span class="step-num">1</span> Firebase Initialization</h3>
-            <p>Install Firebase SDK and configure your project. Save as <code>firebase.js</code>.</p>
-            <pre class="code-block">import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
 
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "neu-lab-log.firebaseapp.com",
-  projectId: "neu-lab-log",
-};
-
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const googleProvider = new GoogleAuthProvider();</pre>
-          </div>
-          <div class="docs-part">
-            <h3><span class="step-num">2</span> Google Auth (NEU Domain Restriction)</h3>
-            <pre class="code-block">async function loginWithGoogle() {
-  const result = await signInWithPopup(auth, googleProvider);
-  const email = result.user.email;
-  if (!email.endsWith('@neu.edu.ph')) {
-    await auth.signOut();
-    throw new Error('Only @neu.edu.ph accounts allowed');
-  }
-  const userDoc = await getDoc(doc(db, 'users', result.user.uid));
-  if (userDoc.data()?.blocked) throw new Error('Account is blocked');
-  return result.user;
-}</pre>
-          </div>
-          <div class="docs-part">
-            <h3><span class="step-num">3</span> Firestore Structure</h3>
-            <pre class="code-block">// users/{uid}
-{ name, email, role: "professor"|"admin", blocked: false }
-
-// rooms/{roomId}
-{ roomNumber, building, isOccupied: false, currentLogId: null }
-
-// logs/{logId}
-{ professorId, professorName, roomNumber,
-  startTime, endTime, college, program,
-  section, track, status: "active"|"completed" }</pre>
-          </div>
-          <div class="docs-part">
-            <h3><span class="step-num">4</span> Start & End Session</h3>
-            <pre class="code-block">// Start Session
-const logRef = await addDoc(collection(db, 'logs'), {
-  ...formData, professorId: auth.currentUser.uid,
-  startTime: serverTimestamp(), status: 'active'
-});
-await updateDoc(doc(db, 'rooms', roomId), {
-  isOccupied: true, currentLogId: logRef.id
-});
-
-// End Session
-await updateDoc(doc(db, 'logs', logId), {
-  endTime: serverTimestamp(), status: 'completed'
-});
-await updateDoc(doc(db, 'rooms', roomId), {
-  isOccupied: false, currentLogId: null
-});</pre>
-          </div>
-        </div>
-      </div>
-
-      <!-- Panel: My QR Code -->
-      <div class="content-panel" id="panel-qr">
-        <div style="display:flex;align-items:center;justify-content:center;min-height:300px">
-          <div style="text-align:center">
-            <div style="background:white;border-radius:16px;padding:20px;display:inline-block;box-shadow:0 4px 20px rgba(0,0,0,0.1)">
-              <canvas id="qr-canvas" width="200" height="200"></canvas>
-            </div>
-            <p id="qr-prof-name" style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--neu-text);margin-top:12px"></p>
-            <p id="qr-prof-email" style="font-size:12px;color:var(--neu-muted);margin-top:4px"></p>
-            <div style="margin-top:16px">
-              <button class="btn btn-primary btn-sm" onclick="downloadQR()">⬇ Download QR</button>
+      <!-- Panel: My Profile -->
+      <div class="content-panel" id="panel-profile">
+        <div style="max-width:420px;margin:0 auto;padding:12px 0">
+          <div style="background:var(--neu-card);border:1px solid var(--neu-border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)">
+            <div style="background:linear-gradient(135deg,var(--neu-red),#aa0000);height:80px;position:relative"></div>
+            <div style="padding:0 24px 24px;margin-top:-36px">
+              <div id="profile-photo-large" style="width:72px;height:72px;border-radius:50%;border:3px solid var(--neu-card);background:linear-gradient(135deg,var(--neu-red),var(--neu-gold));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:24px;color:white;overflow:hidden;margin-bottom:12px"></div>
+              <div id="profile-name-large" style="font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:var(--neu-text)"></div>
+              <div id="profile-email-large" style="font-size:13px;color:var(--neu-muted);margin-top:2px"></div>
+              <div style="margin-top:16px;display:grid;gap:10px">
+                <div style="background:var(--neu-dark);border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+                  <span style="font-size:12px;color:var(--neu-muted);text-transform:uppercase;letter-spacing:.05em">Role</span>
+                  <span class="badge badge-gold">Professor</span>
+                </div>
+                <div style="background:var(--neu-dark);border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+                  <span style="font-size:12px;color:var(--neu-muted);text-transform:uppercase;letter-spacing:.05em">College</span>
+                  <span id="profile-college" style="font-size:13px;font-weight:500;color:var(--neu-text)">—</span>
+                </div>
+                <div style="background:var(--neu-dark);border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+                  <span style="font-size:12px;color:var(--neu-muted);text-transform:uppercase;letter-spacing:.05em">Program</span>
+                  <span id="profile-program" style="font-size:13px;font-weight:500;color:var(--neu-text);text-align:right;max-width:60%">—</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+     
+
 
     </div>
   </div>
@@ -995,19 +926,28 @@ await updateDoc(doc(db, 'rooms', roomId), {
     </div>
     <p style="font-size:13px;color:var(--neu-muted);margin-bottom:18px">Please select your college and program to continue.</p>
     <label>College</label>
-    <select class="input-field" id="modal-college">
+   <select class="input-field" id="modal-college" onchange="updateModalPrograms()">
       <option value="">— Select College —</option>
-      <option>CITCS</option><option>CAS</option>
-      <option>CBA</option><option>COE</option><option>CON</option>
+      <option>College of Accountancy</option>
+      <option>College of Agriculture</option>
+      <option>College of Arts and Sciences</option>
+      <option>College of Business Administration</option>
+      <option>College of Communication</option>
+      <option>College of Informatics and Computing Studies</option>
+      <option>College of Criminology</option>
+      <option>College of Education</option>
+      <option>College of Engineering and Architecture</option>
+      <option>College of Medical Technology</option>
+      <option>College of Midwifery</option>
+      <option>College of Music</option>
+      <option>College of Nursing</option>
+      <option>College of Physical Therapy</option>
+      <option>College of Respiratory Therapy</option>
+      <option>School of International Relations</option>
     </select>
     <label>Program</label>
     <select class="input-field" id="modal-program">
       <option value="">— Select Program —</option>
-      <option>BS Computer Science</option>
-      <option>BS Information Technology</option>
-      <option>BS Electronics Engineering</option>
-      <option>BS Nursing</option>
-      <option>AB Psychology</option>
     </select>
     <div class="modal-footer">
       <button class="btn btn-outline btn-sm" onclick="cancelProgramSelect()">Cancel</button>
@@ -1053,6 +993,39 @@ await updateDoc(doc(db, 'rooms', roomId), {
 </div>
 
 <script>
+
+const NEU_PROGRAMS = {
+  'College of Accountancy': ['BS Accountancy','BS Accounting Information System'],
+  'College of Agriculture': ['BS Agriculture'],
+  'College of Arts and Sciences': ['BA Economics','BA Political Science','BS Biology','BS Psychology','BS Public Administration'],
+  'College of Business Administration': ['BS Business Administration Major in Financial Management','BS Business Administration Major in Human Resource Development Management','BS Business Administration Major in Legal Management','BS Business Administration Major in Marketing Management','BS Entrepreneurship','BS Real Estate Management'],
+  'College of Communication': ['BA Broadcasting','BA Communication','BA Journalism'],
+  'College of Informatics and Computing Studies': ['BS Library and Information Science','BS Computer Science','BS Entertainment and Multimedia Computing - Digital Animation Technology','BS Entertainment and Multimedia Computing - Game Development','BS Information Technology','BS Information System'],
+  'College of Criminology': ['BS Criminology'],
+  'College of Education': ['BS Elementary Education','BS Elementary Education - Preschool Education','BS Elementary Education - Special Education','BS Secondary Education - MAPEH','BS Secondary Education - English','BS Secondary Education - Filipino','BS Secondary Education - Mathematics','BS Secondary Education - Science','BS Secondary Education - Social Studies','BS Secondary Education - Technology and Livelihood Education'],
+  'College of Engineering and Architecture': ['BS Architecture','BS Astronomy','BS Civil Engineering','BS Electrical Engineering','BS Electronics Engineering','BS Industrial Engineering','BS Mechanical Engineering'],
+  'College of Medical Technology': ['BS Medical Technology'],
+  'College of Midwifery': ['Diploma in Midwifery'],
+  'College of Music': ['BM Choral Conducting','BM Music Education','BM Piano','BM Voice'],
+  'College of Nursing': ['BS Nursing'],
+  'College of Physical Therapy': ['BS Physical Therapy'],
+  'College of Respiratory Therapy': ['BS Respiratory Therapy'],
+  'School of International Relations': ['BA Foreign Service']
+};
+
+function updateModalPrograms() {
+  const college = document.getElementById('modal-college').value;
+  const programSelect = document.getElementById('modal-program');
+  programSelect.innerHTML = '<option value="">— Select Program —</option>';
+  if (college && NEU_PROGRAMS[college]) {
+    NEU_PROGRAMS[college].forEach(function(p) {
+      const opt = document.createElement('option');
+      opt.textContent = p; opt.value = p;
+      programSelect.appendChild(opt);
+    });
+  }
+}
+
 // ============================================================
 //  STATE
 // ============================================================
@@ -1064,14 +1037,7 @@ let timerInterval = null;
 let clockInterval = null;
 let isDarkMode    = false;
 
-const ROOMS = [
-  { id: 'r1', number: 'Lab 101', building: 'ICT Building', occupied: false, professor: null,          time: null      },
-  { id: 'r2', number: 'Lab 102', building: 'ICT Building', occupied: true,  professor: 'Prof. Santos', time: '1h 22m' },
-  { id: 'r3', number: 'Lab 201', building: 'Science Bldg', occupied: true,  professor: 'Prof. Reyes',  time: '0h 45m' },
-  { id: 'r4', number: 'Lab 202', building: 'Science Bldg', occupied: false, professor: null,          time: null      },
-  { id: 'r5', number: 'Lab 301', building: 'Engineering',  occupied: true,  professor: 'Prof. Garcia', time: '2h 10m' },
-  { id: 'r6', number: 'Lab 302', building: 'Engineering',  occupied: false, professor: null,          time: null      },
-];
+const ROOMS = [];
 
 // ============================================================
 //  DARK MODE TOGGLE
@@ -1210,9 +1176,9 @@ function showPanel(panelId, el) {
   document.getElementById(panelId).classList.add('active');
   document.querySelectorAll('#page-professor .nav-item').forEach(n => n.classList.remove('active'));
   el.classList.add('active');
-  const titles = { 'panel-session':'Session Log','panel-my-logs':'My History','panel-rooms-prof':'Room Status','panel-docs':'Documentation','panel-qr':'My QR Code' };
- document.getElementById('prof-panel-title').textContent = titles[panelId] || panelId;
-  if (panelId === 'panel-qr') showMyQR();
+  const titles = { 'panel-session':'Session Log','panel-my-logs':'My History','panel-rooms-prof':'Room Status','panel-profile':'My Profile' };
+  document.getElementById('prof-panel-title').textContent = titles[panelId] || panelId;
+  if (panelId === 'panel-profile') showMyProfile();
 }
 
 function showAdminPanel(panelId, el) {
@@ -1576,19 +1542,11 @@ function setupProfessorPortal() {
   } else {
     avatarEl.textContent = initials;
   }
-  // Pre-fill college/program in session form
+  // Auto-fill college/program (read-only fields)
   const collegeEl = document.getElementById('form-college');
   const programEl = document.getElementById('form-program');
-  if (u.college && collegeEl) {
-    for (let i = 0; i < collegeEl.options.length; i++) {
-      if (collegeEl.options[i].text === u.college) { collegeEl.selectedIndex = i; break; }
-    }
-  }
-  if (u.program && programEl) {
-    for (let i = 0; i < programEl.options.length; i++) {
-      if (programEl.options[i].text === u.program) { programEl.selectedIndex = i; break; }
-    }
-  }
+  if (collegeEl && u.college) collegeEl.value = u.college;
+  if (programEl && u.program) programEl.value = u.program;
   updateStartTime();
   renderRoomsGrid('rooms-grid-prof');
   startClock('live-clock');
@@ -1598,66 +1556,26 @@ function setupProfessorPortal() {
 // ============================================================
 //  QR CODE GENERATOR (no external library needed)
 // ============================================================
-function showMyQR() {
+
+function showMyProfile() {
   if (!currentUser) return;
-  const canvas = document.getElementById('qr-canvas');
-  generateQROnCanvas(canvas, currentUser.uid + '|' + currentUser.email);
-  document.getElementById('qr-prof-name').textContent = 'Prof. ' + currentUser.name;
-  document.getElementById('qr-prof-email').textContent = currentUser.email;
-}
-
-function generateQROnCanvas(canvas, text) {
-  // Simple visual QR placeholder using a pattern based on text hash
-  const ctx = canvas.getContext('2d');
-  const size = 200;
-  const cells = 21;
-  const cellSize = size / cells;
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, size, size);
-  ctx.fillStyle = '#000000';
-
-  // Deterministic pattern from text
-  let hash = 0;
-  for (let i = 0; i < text.length; i++) { hash = ((hash << 5) - hash) + text.charCodeAt(i); hash |= 0; }
-
-  // Draw finder patterns (QR-style corners)
-  function drawFinder(x, y) {
-    ctx.fillStyle = '#000';
-    ctx.fillRect(x*cellSize, y*cellSize, 7*cellSize, 7*cellSize);
-    ctx.fillStyle = '#fff';
-    ctx.fillRect((x+1)*cellSize, (y+1)*cellSize, 5*cellSize, 5*cellSize);
-    ctx.fillStyle = '#000';
-    ctx.fillRect((x+2)*cellSize, (y+2)*cellSize, 3*cellSize, 3*cellSize);
-  }
-  drawFinder(0,0); drawFinder(14,0); drawFinder(0,14);
-
-  // Data modules
-  const rand = (i,j) => ((Math.abs(hash * (i*cells+j+1) * 2654435761) >>> 0) % 100) < 55;
-  for (let i = 0; i < cells; i++) {
-    for (let j = 0; j < cells; j++) {
-      // Skip finder pattern zones
-      if ((i<8&&j<8)||(i<8&&j>12)||(i>12&&j<8)) continue;
-      if (rand(i,j)) {
-        ctx.fillStyle = '#000';
-        ctx.fillRect(j*cellSize, i*cellSize, cellSize-0.5, cellSize-0.5);
-      }
+  const nameEl = document.getElementById('profile-name-large');
+  const emailEl = document.getElementById('profile-email-large');
+  const photoEl = document.getElementById('profile-photo-large');
+  const collegeEl = document.getElementById('profile-college');
+  const programEl = document.getElementById('profile-program');
+  if (nameEl) nameEl.textContent = 'Prof. ' + currentUser.name;
+  if (emailEl) emailEl.textContent = currentUser.email;
+  if (collegeEl) collegeEl.textContent = currentUser.college || '—';
+  if (programEl) programEl.textContent = currentUser.program || '—';
+  if (photoEl) {
+    if (currentUser.photo) {
+      photoEl.innerHTML = '<img src="' + currentUser.photo + '" style="width:100%;height:100%;object-fit:cover"/>';
+    } else {
+      const parts = (currentUser.name || 'P R').split(' ');
+      photoEl.textContent = (parts[0][0] + (parts[parts.length-1][0] || '')).toUpperCase();
     }
   }
-
-  // NEU label at bottom
-  ctx.fillStyle = '#CC0000';
-  ctx.font = 'bold 9px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('NEU PROFESSOR ID', size/2, size-3);
-}
-
-function downloadQR() {
-  const canvas = document.getElementById('qr-canvas');
-  const link = document.createElement('a');
-  link.download = 'NEU_QR_' + (currentUser ? currentUser.name.replace(/\s+/g,'_') : 'Professor') + '.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-  showToast('success', '⬇ Downloaded', 'Your QR code has been saved.');
 }
 
 // ============================================================
