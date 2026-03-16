@@ -485,6 +485,9 @@ tr:hover td { background: rgba(0,0,0,0.02); }
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--neu-border); border-radius: 3px; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
 </style>
 </head>
 <body>
@@ -576,6 +579,8 @@ tr:hover td { background: rgba(0,0,0,0.02); }
         <div class="nav-section">Info</div>
         <div class="nav-item" onclick="showPanel('panel-rooms-prof', this)"><span class="nav-icon">🏫</span> Room Status</div>
         <div class="nav-item" onclick="showPanel('panel-docs', this)"><span class="nav-icon">📖</span> Documentation</div>
+<div class="nav-section">My Account</div>
+<div class="nav-item" onclick="showPanel('panel-qr', this)"><span class="nav-icon">📱</span> My QR Code</div>
       </nav>
       <div class="sidebar-user">
         <div class="avatar" id="prof-avatar">JD</div>
@@ -696,7 +701,7 @@ tr:hover td { background: rgba(0,0,0,0.02); }
         <div class="rooms-grid" id="rooms-grid-prof"></div>
       </div>
 
-      <!-- Panel: Documentation -->
+<!-- Panel: Documentation -->
       <div class="content-panel" id="panel-docs">
         <div class="docs-section">
           <h2>📖 System Documentation</h2>
@@ -767,6 +772,23 @@ await updateDoc(doc(db, 'rooms', roomId), {
           </div>
         </div>
       </div>
+
+      <!-- Panel: My QR Code -->
+      <div class="content-panel" id="panel-qr">
+        <div style="display:flex;align-items:center;justify-content:center;min-height:300px">
+          <div style="text-align:center">
+            <div style="background:white;border-radius:16px;padding:20px;display:inline-block;box-shadow:0 4px 20px rgba(0,0,0,0.1)">
+              <canvas id="qr-canvas" width="200" height="200"></canvas>
+            </div>
+            <p id="qr-prof-name" style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--neu-text);margin-top:12px"></p>
+            <p id="qr-prof-email" style="font-size:12px;color:var(--neu-muted);margin-top:4px"></p>
+            <div style="margin-top:16px">
+              <button class="btn btn-primary btn-sm" onclick="downloadQR()">⬇ Download QR</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -961,6 +983,39 @@ await updateDoc(doc(db, 'rooms', roomId), {
   </div>
 </div>
 
+<!-- Program Selection Modal (shown after Google login) -->
+<div class="modal-overlay" id="modal-program-select">
+  <div class="modal" style="max-width:520px">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+      <div id="google-user-photo" style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--neu-red),var(--neu-gold));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:white;flex-shrink:0;overflow:hidden"></div>
+      <div>
+        <h3 style="margin-bottom:2px" id="google-user-name">Welcome!</h3>
+        <p class="modal-sub" style="margin:0" id="google-user-email"></p>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--neu-muted);margin-bottom:18px">Please select your college and program to continue.</p>
+    <label>College</label>
+    <select class="input-field" id="modal-college">
+      <option value="">— Select College —</option>
+      <option>CITCS</option><option>CAS</option>
+      <option>CBA</option><option>COE</option><option>CON</option>
+    </select>
+    <label>Program</label>
+    <select class="input-field" id="modal-program">
+      <option value="">— Select Program —</option>
+      <option>BS Computer Science</option>
+      <option>BS Information Technology</option>
+      <option>BS Electronics Engineering</option>
+      <option>BS Nursing</option>
+      <option>AB Psychology</option>
+    </select>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="cancelProgramSelect()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmProgramSelect()">Continue →</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== MODALS ===== -->
 <div class="modal-overlay" id="modal-end-session">
   <div class="modal">
@@ -1046,16 +1101,70 @@ function switchLoginTab(tab, e) {
   document.getElementById('tab-qr').classList.toggle('hidden', tab !== 'qr');
 }
 
-function simulateGoogleLogin() {
-  const email = prompt('Enter your NEU email to test login:', 'juan.delacruz@neu.edu.ph');
-  if (!email) return;
-  if (!email.endsWith('@neu.edu.ph')) {
-    const el = document.getElementById('login-error');
-    el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 3000);
-    return;
+async function simulateGoogleLogin() {
+  const btn = document.querySelector('.btn-google');
+  btn.disabled = true;
+  btn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid #ccc;border-top-color:#CC0000;border-radius:50%;animation:spin 0.7s linear infinite;margin-right:8px"></span> Signing in...';
+
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ hd: 'neu.edu.ph' });
+    const result = await firebase.auth().signInWithPopup(provider);
+    const email = result.user.email;
+
+    if (!email.endsWith('@neu.edu.ph')) {
+      await firebase.auth().signOut();
+      const el = document.getElementById('login-error');
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 3500);
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 48 48"><path fill="#4285F4" d="M47.5 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.3 5.5-4.9 7.2v6h7.9c4.6-4.3 7.3-10.5 7.3-17.3z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.9-6c-2.1 1.4-4.8 2.3-8 2.3-6.1 0-11.3-4.1-13.2-9.7H2.7v6.2C6.7 42.9 14.8 48 24 48z"/><path fill="#FBBC05" d="M10.8 28.8c-.5-1.4-.7-2.9-.7-4.4s.2-3 .7-4.4v-6.2H2.7C1 17.1 0 20.4 0 24s1 6.9 2.7 9.9l8.1-5.1z"/><path fill="#EA4335" d="M24 9c3.5 0 6.6 1.2 9.1 3.5l6.8-6.8C35.9 2.3 30.4 0 24 0 14.8 0 6.7 5.1 2.7 12.5l8.1 6.2C12.7 13.6 17.9 9 24 9z"/></svg> Continue with Google';
+      return;
+    }
+
+    // Check if blocked in Firestore
+    const db = firebase.firestore();
+    const userDoc = await db.collection('users').doc(result.user.uid).get();
+    if (userDoc.exists && userDoc.data().blocked) {
+      await firebase.auth().signOut();
+      showPage('page-blocked');
+      return;
+    }
+
+    // Save/update user in Firestore
+    await db.collection('users').doc(result.user.uid).set({
+      name: result.user.displayName,
+      email: email,
+      role: userDoc.exists ? (userDoc.data().role || 'professor') : 'professor',
+      photoURL: result.user.photoURL || '',
+      blocked: false,
+      lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+
+    const role = userDoc.exists ? (userDoc.data().role || 'professor') : 'professor';
+
+    if (role === 'admin') {
+      currentUser = { uid: result.user.uid, name: result.user.displayName, email, role: 'admin', photo: result.user.photoURL };
+      renderRoomsGrid('rooms-grid-admin');
+      renderChart('usage-chart', 'week');
+      renderChart('monthly-chart', 'month');
+      startClock('admin-clock');
+      showPage('page-admin');
+      showToast('success', '✅ Admin Access', 'Welcome back, Administrator!');
+    } else {
+      // Show program selection step before entering professor portal
+      pendingGoogleUser = { uid: result.user.uid, name: result.user.displayName, email, photo: result.user.photoURL };
+      showProgramSelectionModal();
+    }
+
+  } catch (err) {
+    console.error(err);
+    if (err.code !== 'auth/popup-closed-by-user') {
+      showToast('error', '❌ Login Failed', err.message || 'An error occurred during sign-in.');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 48 48"><path fill="#4285F4" d="M47.5 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.3 5.5-4.9 7.2v6h7.9c4.6-4.3 7.3-10.5 7.3-17.3z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.9-6c-2.1 1.4-4.8 2.3-8 2.3-6.1 0-11.3-4.1-13.2-9.7H2.7v6.2C6.7 42.9 14.8 48 24 48z"/><path fill="#FBBC05" d="M10.8 28.8c-.5-1.4-.7-2.9-.7-4.4s.2-3 .7-4.4v-6.2H2.7C1 17.1 0 20.4 0 24s1 6.9 2.7 9.9l8.1-5.1z"/><path fill="#EA4335" d="M24 9c3.5 0 6.6 1.2 9.1 3.5l6.8-6.8C35.9 2.3 30.4 0 24 0 14.8 0 6.7 5.1 2.7 12.5l8.1 6.2C12.7 13.6 17.9 9 24 9z"/></svg> Continue with Google';
   }
-  loginAs('professor', email);
 }
 
 function demoLogin(role) {
@@ -1093,16 +1202,6 @@ function loginAs(role, email) {
   }
 }
 
-function doLogout() {
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-  if (clockInterval) { clearInterval(clockInterval); clockInterval = null; }
-  sessionActive = false;
-  document.getElementById('start-session-area').classList.remove('hidden');
-  document.getElementById('active-session-area').classList.add('hidden');
-  showPage('page-login');
-  showToast('success', '👋 Logged Out', 'You have been signed out.');
-}
-
 // ============================================================
 //  PANEL NAVIGATION
 // ============================================================
@@ -1111,8 +1210,9 @@ function showPanel(panelId, el) {
   document.getElementById(panelId).classList.add('active');
   document.querySelectorAll('#page-professor .nav-item').forEach(n => n.classList.remove('active'));
   el.classList.add('active');
-  const titles = { 'panel-session':'Session Log','panel-my-logs':'My History','panel-rooms-prof':'Room Status','panel-docs':'Documentation' };
-  document.getElementById('prof-panel-title').textContent = titles[panelId] || panelId;
+  const titles = { 'panel-session':'Session Log','panel-my-logs':'My History','panel-rooms-prof':'Room Status','panel-docs':'Documentation','panel-qr':'My QR Code' };
+ document.getElementById('prof-panel-title').textContent = titles[panelId] || panelId;
+  if (panelId === 'panel-qr') showMyQR();
 }
 
 function showAdminPanel(panelId, el) {
@@ -1356,7 +1456,224 @@ function startClock(id) {
 // ============================================================
 //  INIT
 // ============================================================
-setInterval(updateStartTime, 1000);
+document.addEventListener('DOMContentLoaded', function() {
+  setInterval(updateStartTime, 1000);
+});
+
 </script>
+<!-- Firebase SDKs (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDrECL-9GAnaeDAqMP4rud9cAhLjYs3-7Y",
+    authDomain: "neu-laboratory-usage-log-f1437.firebaseapp.com",
+    projectId: "neu-laboratory-usage-log-f1437",
+    storageBucket: "neu-laboratory-usage-log-f1437.firebasestorage.app",
+    messagingSenderId: "39504251598",
+    appId: "1:39504251598:web:adf0d39a2ffc338a69de9f"
+  };
+  firebase.initializeApp(firebaseConfig);
+
+// ============================================================
+//  FIREBASE AUTH STATE OBSERVER
+// ============================================================
+let pendingGoogleUser = null;
+
+// Watch for auth changes (handles page refresh)
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof firebase !== 'undefined') {
+    firebase.auth().onAuthStateChanged(async function(user) {
+      if (user && user.email && user.email.endsWith('@neu.edu.ph')) {
+        const db = firebase.firestore();
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+          const data = userDoc.data();
+          if (data.blocked) { showPage('page-blocked'); return; }
+          if (data.role === 'admin') {
+            currentUser = { uid: user.uid, name: user.displayName, email: user.email, role: 'admin', photo: user.photoURL };
+            renderRoomsGrid('rooms-grid-admin');
+            renderChart('usage-chart', 'week');
+            renderChart('monthly-chart', 'month');
+            startClock('admin-clock');
+            showPage('page-admin');
+          } else if (data.college && data.program) {
+            currentUser = { uid: user.uid, name: user.displayName, email: user.email, role: 'professor', photo: user.photoURL, college: data.college, program: data.program };
+            setupProfessorPortal();
+          }
+        }
+      }
+    });
+  }
+});
+
+// ============================================================
+//  PROGRAM SELECTION (post-Google-login step)
+// ============================================================
+function showProgramSelectionModal() {
+  const u = pendingGoogleUser;
+  if (!u) return;
+
+  // Show photo or initials
+  const photoEl = document.getElementById('google-user-photo');
+  if (u.photo) {
+    photoEl.innerHTML = '<img src="' + u.photo + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%" />';
+  } else {
+    photoEl.textContent = u.name ? u.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() : 'P';
+  }
+  document.getElementById('google-user-name').textContent = u.name || 'Professor';
+  document.getElementById('google-user-email').textContent = u.email;
+
+  openModal('modal-program-select');
+}
+
+async function confirmProgramSelect() {
+  const college = document.getElementById('modal-college').value;
+  const program = document.getElementById('modal-program').value;
+  if (!college || !program) {
+    showToast('error', '⚠ Required', 'Please select your college and program.');
+    return;
+  }
+
+  const u = pendingGoogleUser;
+  if (!u) return;
+
+  try {
+    const db = firebase.firestore();
+    await db.collection('users').doc(u.uid).set({
+      name: u.name, email: u.email, role: 'professor',
+      college, program, blocked: false,
+      lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+
+    currentUser = { uid: u.uid, name: u.name, email: u.email, role: 'professor', photo: u.photo, college, program };
+    pendingGoogleUser = null;
+    closeModal('modal-program-select');
+    setupProfessorPortal();
+    showToast('success', '✅ Welcome!', 'Logged in as ' + u.name);
+  } catch (err) {
+    showToast('error', '❌ Error', 'Could not save your profile. Try again.');
+  }
+}
+
+function cancelProgramSelect() {
+  closeModal('modal-program-select');
+  firebase.auth().signOut();
+  pendingGoogleUser = null;
+}
+
+function setupProfessorPortal() {
+  const u = currentUser;
+  // Set name and avatar
+  const nameParts = (u.name || 'P R').split(' ');
+  const initials = (nameParts[0][0] + (nameParts[nameParts.length-1][0] || '')).toUpperCase();
+  document.getElementById('prof-name').textContent = 'Prof. ' + u.name;
+  const avatarEl = document.getElementById('prof-avatar');
+  if (u.photo) {
+    avatarEl.innerHTML = '<img src="' + u.photo + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>';
+    avatarEl.style.padding = '0';
+  } else {
+    avatarEl.textContent = initials;
+  }
+  // Pre-fill college/program in session form
+  const collegeEl = document.getElementById('form-college');
+  const programEl = document.getElementById('form-program');
+  if (u.college && collegeEl) {
+    for (let i = 0; i < collegeEl.options.length; i++) {
+      if (collegeEl.options[i].text === u.college) { collegeEl.selectedIndex = i; break; }
+    }
+  }
+  if (u.program && programEl) {
+    for (let i = 0; i < programEl.options.length; i++) {
+      if (programEl.options[i].text === u.program) { programEl.selectedIndex = i; break; }
+    }
+  }
+  updateStartTime();
+  renderRoomsGrid('rooms-grid-prof');
+  startClock('live-clock');
+  showPage('page-professor');
+}
+
+// ============================================================
+//  QR CODE GENERATOR (no external library needed)
+// ============================================================
+function showMyQR() {
+  if (!currentUser) return;
+  const canvas = document.getElementById('qr-canvas');
+  generateQROnCanvas(canvas, currentUser.uid + '|' + currentUser.email);
+  document.getElementById('qr-prof-name').textContent = 'Prof. ' + currentUser.name;
+  document.getElementById('qr-prof-email').textContent = currentUser.email;
+}
+
+function generateQROnCanvas(canvas, text) {
+  // Simple visual QR placeholder using a pattern based on text hash
+  const ctx = canvas.getContext('2d');
+  const size = 200;
+  const cells = 21;
+  const cellSize = size / cells;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = '#000000';
+
+  // Deterministic pattern from text
+  let hash = 0;
+  for (let i = 0; i < text.length; i++) { hash = ((hash << 5) - hash) + text.charCodeAt(i); hash |= 0; }
+
+  // Draw finder patterns (QR-style corners)
+  function drawFinder(x, y) {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(x*cellSize, y*cellSize, 7*cellSize, 7*cellSize);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect((x+1)*cellSize, (y+1)*cellSize, 5*cellSize, 5*cellSize);
+    ctx.fillStyle = '#000';
+    ctx.fillRect((x+2)*cellSize, (y+2)*cellSize, 3*cellSize, 3*cellSize);
+  }
+  drawFinder(0,0); drawFinder(14,0); drawFinder(0,14);
+
+  // Data modules
+  const rand = (i,j) => ((Math.abs(hash * (i*cells+j+1) * 2654435761) >>> 0) % 100) < 55;
+  for (let i = 0; i < cells; i++) {
+    for (let j = 0; j < cells; j++) {
+      // Skip finder pattern zones
+      if ((i<8&&j<8)||(i<8&&j>12)||(i>12&&j<8)) continue;
+      if (rand(i,j)) {
+        ctx.fillStyle = '#000';
+        ctx.fillRect(j*cellSize, i*cellSize, cellSize-0.5, cellSize-0.5);
+      }
+    }
+  }
+
+  // NEU label at bottom
+  ctx.fillStyle = '#CC0000';
+  ctx.font = 'bold 9px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('NEU PROFESSOR ID', size/2, size-3);
+}
+
+function downloadQR() {
+  const canvas = document.getElementById('qr-canvas');
+  const link = document.createElement('a');
+  link.download = 'NEU_QR_' + (currentUser ? currentUser.name.replace(/\s+/g,'_') : 'Professor') + '.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  showToast('success', '⬇ Downloaded', 'Your QR code has been saved.');
+}
+
+// ============================================================
+//  LOGOUT — Firebase signOut + UI reset
+// ============================================================
+function doLogout() {
+  if (typeof firebase !== 'undefined') firebase.auth().signOut();
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  if (clockInterval) { clearInterval(clockInterval); clockInterval = null; }
+  sessionActive = false;
+  document.getElementById('start-session-area').classList.remove('hidden');
+  document.getElementById('active-session-area').classList.add('hidden');
+  showPage('page-login');
+  showToast('success', '👋 Logged Out', 'You have been signed out.');
+}
+</script>
+
 </body>
 </html>
