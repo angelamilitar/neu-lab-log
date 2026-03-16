@@ -741,4 +741,1100 @@ tr:hover td { background: rgba(0,0,0,0.02); }
       </div>
       <nav class="sidebar-nav">
         <div class="nav-section">Overview</div>
-        <div class="nav-item active" onclick="s
+        <div class="nav-item active" onclick="showAdminPanel('panel-dashboard', this)"><span class="nav-icon">📊</span> Dashboard</div>
+        <div class="nav-item" onclick="showAdminPanel('panel-rooms', this)"><span class="nav-icon">🏫</span> Rooms</div>
+        <div class="nav-section">Management</div>
+        <div class="nav-item" onclick="showAdminPanel('panel-logs', this)"><span class="nav-icon">📋</span> All Logs</div>
+        <div class="nav-item" onclick="showAdminPanel('panel-professors', this)"><span class="nav-icon">👥</span> Professors</div>
+        <div class="nav-item" onclick="showAdminPanel('panel-reports', this)"><span class="nav-icon">📁</span> Reports</div>
+      </nav>
+      <div class="sidebar-user">
+        <div class="avatar" style="background:linear-gradient(135deg,#2563EB,#1d4ed8)">AD</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">Admin User</div>
+          <div class="sidebar-user-role">Administrator</div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()" title="Logout">⏏</button>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title" id="admin-panel-title">Dashboard</div>
+        <div class="topbar-right">
+          <button class="theme-btn" id="admin-theme-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+          <span class="badge badge-blue">Admin View</span>
+          <span id="admin-clock" style="font-size:12px;color:var(--neu-muted);font-family:'Syne',sans-serif;"></span>
+        </div>
+      </div>
+
+      <!-- Panel: Dashboard -->
+      <div class="content-panel active" id="panel-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card red">
+            <div class="stat-icon">🧪</div>
+            <div class="stat-value" id="stat-total-sessions">0</div>
+            <div class="stat-label">Total Sessions</div>
+            <div class="stat-change" id="stat-sessions-sub" style="color:var(--neu-muted)">All time</div>
+          </div>
+          <div class="stat-card gold">
+            <div class="stat-icon">⏱️</div>
+            <div class="stat-value" id="stat-total-hours">0h</div>
+            <div class="stat-label">Total Hours Logged</div>
+            <div class="stat-change" id="stat-hours-sub" style="color:var(--neu-muted)">All time</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-icon">🏫</div>
+            <div class="stat-value" id="stat-active-rooms">0</div>
+            <div class="stat-label">Rooms Active Now</div>
+            <div class="stat-change" id="stat-rooms-sub" style="color:var(--neu-muted)">of 0 total rooms</div>
+          </div>
+          <div class="stat-card blue">
+            <div class="stat-icon">👨‍🏫</div>
+            <div class="stat-value" id="stat-professors">0</div>
+            <div class="stat-label">Professors Registered</div>
+            <div class="stat-change" style="color:var(--neu-muted)">Registered accounts</div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>📈 Room Usage — This Week</h3>
+          <div class="bar-chart" id="usage-chart"></div>
+          <div class="chart-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--neu-red)"></div>Morning Sessions</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--neu-gold)"></div>Afternoon Sessions</div>
+          </div>
+        </div>
+        <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:12px;color:var(--neu-text)">🏫 Live Room Status</h3>
+        <div class="rooms-grid" id="rooms-grid-admin"></div>
+      </div>
+
+      <!-- Panel: Manage Rooms -->
+      <div class="content-panel" id="panel-rooms">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h3 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--neu-text)">🏫 Manage Rooms</h3>
+          <button class="btn btn-primary btn-sm" onclick="openAddRoomModal()">+ Add Room</button>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead><tr><th>Room</th><th>Building</th><th>Status</th><th>Current User</th><th>Actions</th></tr></thead>
+            <tbody id="rooms-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Panel: All Logs -->
+      <div class="content-panel" id="panel-logs">
+        <div class="export-bar" style="flex-wrap:wrap;gap:8px;margin-bottom:10px">
+          <select class="search-input" style="width:150px" id="filter-period" onchange="applyPeriodFilter()">
+            <option value="all">All Time</option>
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="custom">Custom Range</option>
+          </select>
+          <input type="date" class="search-input" style="width:140px;display:none" id="filter-date-from" onchange="filterLogs()" />
+          <input type="date" class="search-input" style="width:140px;display:none" id="filter-date-to" onchange="filterLogs()" />
+          <input type="text" class="search-input" id="filter-professor" placeholder="Search professor..." oninput="filterLogs()" />
+          <select class="search-input" style="width:170px" id="filter-building" onchange="filterLogs()">
+            <option value="">All Buildings</option>
+            <option>Main Building</option>
+            <option>Integrated School Building</option>
+            <option>Professional School Building</option>
+            <option>School of Management Building</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="exportCSV()">⬇ Export CSV</button>
+          <button class="btn btn-outline btn-sm" onclick="exportPDF()">🖨 Export PDF</button>
+        </div>
+        <div class="table-card">
+          <div class="table-header">
+            <h3>All Session Logs</h3>
+           <span class="badge badge-gold" id="log-count">0 records</span>
+          </div>
+          <table>
+            
+           <thead><tr><th>Professor</th><th>Room</th><th>Building</th><th>Date</th><th>Start</th><th>End</th><th>Duration</th><th>College</th><th>Section</th><th>Status</th></tr></thead> <tbody id="all-logs-tbody">
+          <tr id="admin-logs-empty"><td colspan="10" style="text-align:center;color:var(--neu-muted);padding:24px">No session logs yet.</td></tr>    
+          </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Panel: Professors -->
+      <div class="content-panel" id="panel-professors">
+        <div class="table-card">
+          <div class="table-header">
+            <h3>👥 Professor Accounts</h3>
+            <input type="text" class="search-input" placeholder="Search professor..." />
+          </div>
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>College</th><th>Sessions</th><th>Last Active</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Juan Dela Cruz</strong></td><td>juan.delacruz@neu.edu.ph</td><td>CITCS</td><td>18</td><td>Today</td><td><span class="badge badge-green">Active</span></td><td><button class="action-btn block" onclick="blockProfessor(this, 'Juan Dela Cruz')">Block</button></td></tr>
+              <tr><td><strong>Maria Santos</strong></td><td>maria.santos@neu.edu.ph</td><td>COE</td><td>24</td><td>Today</td><td><span class="badge badge-green">Active</span></td><td><button class="action-btn block" onclick="blockProfessor(this, 'Maria Santos')">Block</button></td></tr>
+              <tr><td><strong>Pedro Reyes</strong></td><td>pedro.reyes@neu.edu.ph</td><td>CAS</td><td>9</td><td>Today</td><td><span class="badge badge-green">Active</span></td><td><button class="action-btn block" onclick="blockProfessor(this, 'Pedro Reyes')">Block</button></td></tr>
+              <tr><td><strong>Ana Garcia</strong></td><td>ana.garcia@neu.edu.ph</td><td>CON</td><td>15</td><td>Today</td><td><span class="badge badge-green">Active</span></td><td><button class="action-btn block" onclick="blockProfessor(this, 'Ana Garcia')">Block</button></td></tr>
+              <tr><td><strong>Luis Torres</strong></td><td>luis.torres@neu.edu.ph</td><td>CBA</td><td>4</td><td>Mar 10</td><td><span class="badge badge-red">Blocked</span></td><td><button class="action-btn" onclick="unblockProfessor(this, 'Luis Torres')">Unblock</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Panel: Reports -->
+      <div class="content-panel" id="panel-reports">
+        <div class="docs-section">
+          <h2>📁 Reports & Export</h2>
+          <p class="intro">Generate and export usage reports from Firestore data.</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px">
+            <div class="stat-card blue" style="cursor:pointer" onclick="exportCSV()">
+              <div class="stat-icon">📊</div>
+              <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--neu-text)">Export CSV</div>
+              <p style="font-size:12px;color:var(--neu-muted);margin-top:6px">Download all logs as a spreadsheet</p>
+            </div>
+            <div class="stat-card gold" style="cursor:pointer" onclick="exportPDF()">
+              <div class="stat-icon">🖨️</div>
+              <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--neu-text)">Export PDF</div>
+              <p style="font-size:12px;color:var(--neu-muted);margin-top:6px">Download printable PDF report</p>
+            </div>
+            <div class="stat-card green" style="cursor:pointer">
+              <div class="stat-icon">📧</div>
+              <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--neu-text)">Email Report</div>
+              <p style="font-size:12px;color:var(--neu-muted);margin-top:6px">Send weekly report to admin email</p>
+            </div>
+          </div>
+          <div class="chart-card">
+            <h3>📈 Monthly Usage Overview</h3>
+            <div class="bar-chart" id="monthly-chart"></div>
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--neu-red)"></div>Morning Sessions</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--neu-gold)"></div>Afternoon Sessions</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Program Selection Modal (shown after Google login) -->
+<div class="modal-overlay" id="modal-program-select">
+  <div class="modal" style="max-width:520px">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+      <div id="google-user-photo" style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--neu-red),var(--neu-gold));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:white;flex-shrink:0;overflow:hidden"></div>
+      <div>
+        <h3 style="margin-bottom:2px" id="google-user-name">Welcome!</h3>
+        <p class="modal-sub" style="margin:0" id="google-user-email"></p>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--neu-muted);margin-bottom:18px">Please select your college and program to continue.</p>
+    <label>College</label>
+   <select class="input-field" id="modal-college" onchange="updateModalPrograms()">
+      <option value="">— Select College —</option>
+      <option>College of Accountancy</option>
+      <option>College of Agriculture</option>
+      <option>College of Arts and Sciences</option>
+      <option>College of Business Administration</option>
+      <option>College of Communication</option>
+      <option>College of Informatics and Computing Studies</option>
+      <option>College of Criminology</option>
+      <option>College of Education</option>
+      <option>College of Engineering and Architecture</option>
+      <option>College of Medical Technology</option>
+      <option>College of Midwifery</option>
+      <option>College of Music</option>
+      <option>College of Nursing</option>
+      <option>College of Physical Therapy</option>
+      <option>College of Respiratory Therapy</option>
+      <option>School of International Relations</option>
+    </select>
+    <label>Program</label>
+    <select class="input-field" id="modal-program">
+      <option value="">— Select Program —</option>
+    </select>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="cancelProgramSelect()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmProgramSelect()">Continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+<div class="modal-overlay" id="modal-end-session">
+  <div class="modal">
+    <h3>⏹ End Session?</h3>
+    <p class="modal-sub">You are about to end your current session. The end time will be recorded.</p>
+    <div style="background:var(--neu-dark);border-radius:10px;padding:14px;font-size:13px;line-height:1.8;color:var(--neu-text)">
+      <strong id="modal-room-name"></strong><br/>
+      <span style="color:var(--neu-muted)">Duration: </span><span id="modal-duration"></span>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-end-session')">Cancel</button>
+      <button class="btn btn-danger btn-sm" onclick="endSession()">Confirm End Session</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-add-room">
+  <div class="modal">
+    <h3>➕ Add New Room</h3>
+    <p class="modal-sub">Register a new lab room in the system.</p>
+    <label>Room Number / Name</label>
+    <input class="input-field" id="new-room-number" placeholder="e.g. Lab 303" />
+    <label>Building</label>
+    <select class="input-field" id="new-room-building">
+      <option>Main Building</option>
+      <option>Integrated School Building</option>
+      <option>Professional School Building</option>
+      <option>School of Management Building</option>
+    </select>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-add-room')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="addRoom()">Add Room</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+  function renderAdminRoomsTable() {
+  const tbody = document.getElementById('rooms-table-body');
+  if (!tbody) return;
+  let html = '';
+  Object.keys(BUILDINGS).forEach(function(bldg) {
+    const info = BUILDINGS[bldg];
+    const bldgRooms = ROOMS.filter(function(r){ return r.building === bldg; });
+    bldgRooms.forEach(function(r) {
+      const statusBadge = r.occupied
+        ? '<span class="badge badge-red">Occupied</span>'
+        : '<span class="badge badge-green">Free</span>';
+      const currentUser_ = r.occupied ? (r.professor || '—') : '—';
+      html += '<tr>';
+      html += '<td><strong style="color:' + info.color + '">' + r.number + '</strong></td>';
+      html += '<td><span style="display:inline-flex;align-items:center;gap:6px">' + info.icon + ' ' + bldg + '</span></td>';
+      html += '<td>' + statusBadge + '</td>';
+      html += '<td>' + currentUser_ + '</td>';
+      html += '<td>—</td>';
+      html += '</tr>';
+    });
+  });
+  tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;color:var(--neu-muted);padding:20px">No rooms found.</td></tr>';
+}
+
+const NEU_PROGRAMS = {
+  'College of Accountancy': ['BS Accountancy','BS Accounting Information System'],
+  'College of Agriculture': ['BS Agriculture'],
+  'College of Arts and Sciences': ['BA Economics','BA Political Science','BS Biology','BS Psychology','BS Public Administration'],
+  'College of Business Administration': ['BS Business Administration Major in Financial Management','BS Business Administration Major in Human Resource Development Management','BS Business Administration Major in Legal Management','BS Business Administration Major in Marketing Management','BS Entrepreneurship','BS Real Estate Management'],
+  'College of Communication': ['BA Broadcasting','BA Communication','BA Journalism'],
+  'College of Informatics and Computing Studies': ['BS Library and Information Science','BS Computer Science','BS Entertainment and Multimedia Computing - Digital Animation Technology','BS Entertainment and Multimedia Computing - Game Development','BS Information Technology','BS Information System'],
+  'College of Criminology': ['BS Criminology'],
+  'College of Education': ['BS Elementary Education','BS Elementary Education - Preschool Education','BS Elementary Education - Special Education','BS Secondary Education - MAPEH','BS Secondary Education - English','BS Secondary Education - Filipino','BS Secondary Education - Mathematics','BS Secondary Education - Science','BS Secondary Education - Social Studies','BS Secondary Education - Technology and Livelihood Education'],
+  'College of Engineering and Architecture': ['BS Architecture','BS Astronomy','BS Civil Engineering','BS Electrical Engineering','BS Electronics Engineering','BS Industrial Engineering','BS Mechanical Engineering'],
+  'College of Medical Technology': ['BS Medical Technology'],
+  'College of Midwifery': ['Diploma in Midwifery'],
+  'College of Music': ['BM Choral Conducting','BM Music Education','BM Piano','BM Voice'],
+  'College of Nursing': ['BS Nursing'],
+  'College of Physical Therapy': ['BS Physical Therapy'],
+  'College of Respiratory Therapy': ['BS Respiratory Therapy'],
+  'School of International Relations': ['BA Foreign Service']
+};
+
+function updateModalPrograms() {
+  const college = document.getElementById('modal-college').value;
+  const programSelect = document.getElementById('modal-program');
+  programSelect.innerHTML = '<option value="">— Select Program —</option>';
+  if (college && NEU_PROGRAMS[college]) {
+    NEU_PROGRAMS[college].forEach(function(p) {
+      const opt = document.createElement('option');
+      opt.textContent = p; opt.value = p;
+      programSelect.appendChild(opt);
+    });
+  }
+}
+
+// ============================================================
+//  STATE
+// ============================================================
+let currentUser   = null;
+let sessionActive = false;
+let sessionData   = {};
+let sessionStart  = null;
+let timerInterval = null;
+let clockInterval = null;
+let isDarkMode    = false;
+
+const BUILDINGS = {
+  'Main Building':                { color: '#CC0000', icon: '🏛️', short: 'MB'  },
+  'Integrated School Building':   { color: '#2563EB', icon: '🏫', short: 'ISB' },
+  'Professional School Building': { color: '#16A34A', icon: '🎓', short: 'PSB' },
+  'School of Management Building':{ color: '#D97706', icon: '💼', short: 'SMB' },
+};
+
+function generateRooms() {
+  const rooms = [];
+  const buildings = Object.keys(BUILDINGS);
+  const floors = [1, 2, 3, 4];
+  buildings.forEach(function(bldg) {
+    floors.forEach(function(floor) {
+      for (let r = 1; r <= 20; r++) {
+        const num = floor * 100 + r;
+        rooms.push({ id: bldg + '-' + num, number: String(num), building: bldg, occupied: false, professor: null, time: null, startTs: null });
+      }
+    });
+  });
+  return rooms;
+}
+
+let ROOMS = generateRooms();
+
+// ============================================================
+//  DARK MODE TOGGLE
+// ============================================================
+function toggleDarkMode() {
+  isDarkMode = !isDarkMode;
+  document.documentElement.classList.toggle('dark', isDarkMode);
+  const label = isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode';
+  document.querySelectorAll('.theme-btn').forEach(b => b.textContent = label);
+}
+
+// ============================================================
+//  PAGE ROUTING
+// ============================================================
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ============================================================
+//  LOGIN
+// ============================================================
+function switchLoginTab(tab, e) {
+  document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById('tab-google').classList.toggle('hidden', tab !== 'google');
+  document.getElementById('tab-qr').classList.toggle('hidden', tab !== 'qr');
+}
+
+async function simulateGoogleLogin() {
+  const btn = document.querySelector('.btn-google');
+  btn.disabled = true;
+  btn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid #ccc;border-top-color:#CC0000;border-radius:50%;animation:spin 0.7s linear infinite;margin-right:8px"></span> Signing in...';
+
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ hd: 'neu.edu.ph' });
+    const result = await firebase.auth().signInWithPopup(provider);
+    const email = result.user.email;
+
+    if (!email.endsWith('@neu.edu.ph')) {
+      await firebase.auth().signOut();
+      const el = document.getElementById('login-error');
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 3500);
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 48 48"><path fill="#4285F4" d="M47.5 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.3 5.5-4.9 7.2v6h7.9c4.6-4.3 7.3-10.5 7.3-17.3z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.9-6c-2.1 1.4-4.8 2.3-8 2.3-6.1 0-11.3-4.1-13.2-9.7H2.7v6.2C6.7 42.9 14.8 48 24 48z"/><path fill="#FBBC05" d="M10.8 28.8c-.5-1.4-.7-2.9-.7-4.4s.2-3 .7-4.4v-6.2H2.7C1 17.1 0 20.4 0 24s1 6.9 2.7 9.9l8.1-5.1z"/><path fill="#EA4335" d="M24 9c3.5 0 6.6 1.2 9.1 3.5l6.8-6.8C35.9 2.3 30.4 0 24 0 14.8 0 6.7 5.1 2.7 12.5l8.1 6.2C12.7 13.6 17.9 9 24 9z"/></svg> Continue with Google';
+      return;
+    }
+
+    // Check if blocked in Firestore
+    const db = firebase.firestore();
+    const userDoc = await db.collection('users').doc(result.user.uid).get();
+    if (userDoc.exists && userDoc.data().blocked) {
+      await firebase.auth().signOut();
+      showPage('page-blocked');
+      return;
+    }
+
+    // Save/update user in Firestore
+    await db.collection('users').doc(result.user.uid).set({
+      name: result.user.displayName,
+      email: email,
+      role: userDoc.exists ? (userDoc.data().role || 'professor') : 'professor',
+      photoURL: result.user.photoURL || '',
+      blocked: false,
+      lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+
+    const role = userDoc.exists ? (userDoc.data().role || 'professor') : 'professor';
+
+    if (role === 'admin') {
+      currentUser = { uid: result.user.uid, name: result.user.displayName, email, role: 'admin', photo: result.user.photoURL };
+      renderRoomsGrid('rooms-grid-admin');
+      renderChart('usage-chart', 'week');
+      renderChart('monthly-chart', 'month');
+      startClock('admin-clock');
+      showPage('page-admin');
+      showToast('success', '✅ Admin Access', 'Welcome back, Administrator!');
+    } else {
+      // Show program selection step before entering professor portal
+      pendingGoogleUser = { uid: result.user.uid, name: result.user.displayName, email, photo: result.user.photoURL };
+      showProgramSelectionModal();
+    }
+
+  } catch (err) {
+    console.error(err);
+    if (err.code !== 'auth/popup-closed-by-user') {
+      showToast('error', '❌ Login Failed', err.message || 'An error occurred during sign-in.');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 48 48"><path fill="#4285F4" d="M47.5 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.3 5.5-4.9 7.2v6h7.9c4.6-4.3 7.3-10.5 7.3-17.3z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.9-6c-2.1 1.4-4.8 2.3-8 2.3-6.1 0-11.3-4.1-13.2-9.7H2.7v6.2C6.7 42.9 14.8 48 24 48z"/><path fill="#FBBC05" d="M10.8 28.8c-.5-1.4-.7-2.9-.7-4.4s.2-3 .7-4.4v-6.2H2.7C1 17.1 0 20.4 0 24s1 6.9 2.7 9.9l8.1-5.1z"/><path fill="#EA4335" d="M24 9c3.5 0 6.6 1.2 9.1 3.5l6.8-6.8C35.9 2.3 30.4 0 24 0 14.8 0 6.7 5.1 2.7 12.5l8.1 6.2C12.7 13.6 17.9 9 24 9z"/></svg> Continue with Google';
+  }
+}
+
+function demoLogin(role) {
+  if (role === 'professor') loginAs('professor', 'juan.delacruz@neu.edu.ph');
+  else loginAs('admin', 'admin@neu.edu.ph');
+}
+
+function simulateQRLogin() {
+  const id = document.getElementById('qr-id-input').value.trim().toUpperCase();
+  const validIDs = ['NEU-12345', 'NEU-67890', 'NEU-11111'];
+  if (!validIDs.includes(id)) {
+    showToast('error', '❌ Invalid ID', 'Faculty ID not found in system.');
+    return;
+  }
+  loginAs('professor', 'juan.delacruz@neu.edu.ph');
+}
+
+function loginAs(role, email) {
+  currentUser = { name: role === 'admin' ? 'Admin User' : 'Juan Dela Cruz', email, role };
+  if (role === 'professor') {
+    document.getElementById('prof-name').textContent = 'Prof. Juan Dela Cruz';
+    document.getElementById('prof-avatar').textContent = 'JD';
+    updateStartTime();
+    renderRoomsGrid('rooms-grid-prof');
+    startClock('live-clock');
+    showPage('page-professor');
+    showToast('success', '✅ Logged In', 'Welcome, Prof. Juan Dela Cruz!');
+  } else {
+    renderRoomsGrid('rooms-grid-admin');
+    renderChart('usage-chart', 'week');
+    renderChart('monthly-chart', 'month');
+    startClock('admin-clock');
+    updateAdminStats();
+    showPage('page-admin');
+    showToast('success', '✅ Admin Access', 'Welcome back, Administrator!');
+  }
+}
+
+// ============================================================
+//  PANEL NAVIGATION
+// ============================================================
+function showPanel(panelId, el) {
+  document.querySelectorAll('#page-professor .content-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(panelId).classList.add('active');
+  document.querySelectorAll('#page-professor .nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  const titles = { 'panel-session':'Session Log','panel-my-logs':'My History','panel-rooms-prof':'Room Status','panel-profile':'My Profile' };
+  document.getElementById('prof-panel-title').textContent = titles[panelId] || panelId;
+  if (panelId === 'panel-profile') showMyProfile();
+}
+
+function showAdminPanel(panelId, el) {
+  document.querySelectorAll('#page-admin .content-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(panelId).classList.add('active');
+  document.querySelectorAll('#page-admin .nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  const titles = { 'panel-dashboard':'Dashboard','panel-rooms':'Manage Rooms','panel-logs':'All Logs','panel-professors':'Professors','panel-reports':'Reports & Export' };
+  document.getElementById('admin-panel-title').textContent = titles[panelId] || panelId;
+  if (panelId === 'panel-rooms') renderAdminRoomsTable();
+  if (panelId === 'panel-dashboard') updateAdminStats();
+}
+
+// ============================================================
+//  SESSION LOGIC
+// ============================================================
+function updateStartTime() {
+  const el = document.getElementById('form-start-time');
+  if (el) el.value = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+
+function startSession() {
+  const roomVal = document.getElementById('form-room').value;
+  const bldg    = document.getElementById('form-building').value;
+  const college = document.getElementById('form-college').value;
+  const program = document.getElementById('form-program').value;
+  const section = document.getElementById('form-section').value;
+  const track   = document.getElementById('form-track').value;
+
+  if (!roomVal || !bldg || !college || !program || !section || !track) {
+    showToast('error', '⚠ Incomplete Form', 'Please fill in all required fields.');
+    return;
+  }
+
+  const roomNum = roomVal.split('|')[1];
+  const roomLabel = 'Room ' + roomNum + ' — ' + bldg;
+
+  // Mark room as occupied
+  const roomObj = ROOMS.find(function(r){ return r.building === bldg && r.number === roomNum; });
+  if (roomObj) {
+    roomObj.occupied = true;
+    roomObj.professor = 'Prof. ' + (currentUser ? currentUser.name : 'Unknown');
+    roomObj.startTs = new Date();
+  }
+
+  sessionStart = new Date();
+  sessionData  = { room: roomLabel, building: bldg, roomNum, college, program, section, track };
+  sessionActive = true;
+
+  document.getElementById('a-prof').textContent         = 'Prof. ' + (currentUser ? currentUser.name : '');
+  document.getElementById('a-room').textContent         = roomLabel;
+  document.getElementById('a-college-prog').textContent = college + ' – ' + program;
+  document.getElementById('a-section').textContent      = section;
+  document.getElementById('a-track').textContent        = track;
+  document.getElementById('a-start').textContent        = sessionStart.toLocaleTimeString();
+  document.getElementById('active-room-name').textContent = roomLabel;
+
+  document.getElementById('start-session-area').classList.add('hidden');
+  document.getElementById('active-session-area').classList.remove('hidden');
+  document.getElementById('session-status-badge').textContent = '● Active: Room ' + roomNum;
+  document.getElementById('session-status-badge').className   = 'badge badge-red';
+
+  timerInterval = setInterval(updateTimer, 1000);
+  updateAdminStats();
+  showToast('success', '🟢 Session Started', roomLabel + ' is now occupied.');
+}
+
+function updateTimer() {
+  const elapsed = Math.floor((new Date() - sessionStart) / 1000);
+  const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+  const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+  const s = String(elapsed % 60).padStart(2, '0');
+  document.getElementById('session-timer').textContent = h + ':' + m + ':' + s;
+}
+
+function confirmEndSession() {
+  const elapsed = Math.floor((new Date() - sessionStart) / 1000);
+  document.getElementById('modal-room-name').textContent = sessionData.room;
+  document.getElementById('modal-duration').textContent  = Math.floor(elapsed/3600) + 'h ' + Math.floor((elapsed%3600)/60) + 'm';
+  openModal('modal-end-session');
+}
+
+function endSession() {
+  const endTime = new Date();
+  const elapsed = Math.floor((endTime - sessionStart) / 1000);
+  const hh = Math.floor(elapsed / 3600);
+  const mm = Math.floor((elapsed % 3600) / 60);
+  const durationStr = hh + 'h ' + mm + 'm';
+
+  // Free up room
+  const roomObj = ROOMS.find(function(r){ return r.building === sessionData.building && r.number === sessionData.roomNum; });
+  if (roomObj) { roomObj.occupied = false; roomObj.professor = null; roomObj.startTs = null; }
+
+  // Add to session history
+  const dateStr = sessionStart.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  const startStr = sessionStart.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+  const endStr   = endTime.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+  const tbody = document.getElementById('my-logs-tbody');
+  hideEmptyRow();
+  const row = tbody.insertRow(0);
+  row.innerHTML =
+    '<td>Room ' + sessionData.roomNum + '</td>' +
+    '<td>' + sessionData.building + '</td>' +
+    '<td>' + dateStr + '</td>' +
+    '<td>' + startStr + '</td>' +
+    '<td>' + endStr + '</td>' +
+    '<td>' + durationStr + '</td>' +
+    '<td>' + sessionData.program + '</td>' +
+    '<td>' + sessionData.section + '</td>';
+
+  // Push to admin log store
+  const durationMins = Math.floor(elapsed / 60);
+  const isoDate = sessionStart.toISOString().split('T')[0];
+  ALL_LOGS.unshift({
+    professor: (currentUser ? currentUser.name : 'Unknown'),
+    room: 'Room ' + sessionData.roomNum,
+    building: sessionData.building,
+    date: sessionStart.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
+    isoDate: isoDate,
+    start: startStr,
+    end: endStr,
+    duration: durationStr,
+    durationMins: durationMins,
+    college: sessionData.college,
+    section: sessionData.section,
+    status: 'Completed'
+  });
+
+  // Add row to admin logs table
+  const adminEmpty = document.getElementById('admin-logs-empty');
+  if (adminEmpty) adminEmpty.remove();
+  const adminTbody = document.getElementById('all-logs-tbody');
+  const adminRow = adminTbody.insertRow(0);
+  adminRow.dataset.date = isoDate;
+  adminRow.innerHTML =
+    '<td>' + (currentUser ? currentUser.name : '—') + '</td>' +
+    '<td>Room ' + sessionData.roomNum + '</td>' +
+    '<td>' + sessionData.building + '</td>' +
+    '<td>' + sessionStart.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + '</td>' +
+    '<td>' + startStr + '</td>' +
+    '<td>' + endStr + '</td>' +
+    '<td>' + durationStr + '</td>' +
+    '<td>' + sessionData.college + '</td>' +
+    '<td>' + sessionData.section + '</td>' +
+    '<td><span class="badge badge-green">Completed</span></td>';
+
+  // Update admin stats
+  updateAdminStats();
+
+  clearInterval(timerInterval); timerInterval = null;
+  sessionActive = false;
+  closeModal('modal-end-session');
+
+  // Reset form
+  document.getElementById('form-building').value = '';
+  document.getElementById('form-room').innerHTML = '<option value="">— Select Building First —</option>';
+  document.getElementById('form-room').disabled = true;
+  document.getElementById('form-section').value = '';
+  document.getElementById('form-track').value = '';
+
+  document.getElementById('start-session-area').classList.remove('hidden');
+  document.getElementById('active-session-area').classList.add('hidden');
+  document.getElementById('session-status-badge').textContent = '● No Active Session';
+  document.getElementById('session-status-badge').className   = 'badge badge-green';
+  updateStartTime();
+  showToast('success', '⏹ Session Ended', 'Thank you for using ' + sessionData.room + '. Have a great day!');
+}
+
+// ============================================================
+//  ROOMS GRID
+// ============================================================
+
+function updateRoomOptions() {
+  const bldg = document.getElementById('form-building').value;
+  const roomSel = document.getElementById('form-room');
+  roomSel.innerHTML = '<option value="">— Select Room —</option>';
+  if (!bldg) { roomSel.disabled = true; return; }
+  roomSel.disabled = false;
+  const floors = [1,2,3,4];
+  floors.forEach(function(floor) {
+    const grp = document.createElement('optgroup');
+    grp.label = 'Floor ' + floor;
+    for (let r = 1; r <= 20; r++) {
+      const num = floor * 100 + r;
+      const roomObj = ROOMS.find(function(x){ return x.building === bldg && x.number === String(num); });
+      const opt = document.createElement('option');
+      opt.value = bldg + '|' + num;
+      opt.textContent = 'Room ' + num + (roomObj && roomObj.occupied ? ' — 🔴 Occupied' : '');
+      opt.disabled = roomObj && roomObj.occupied;
+      grp.appendChild(opt);
+    }
+    roomSel.appendChild(grp);
+  });
+}
+
+function renderRoomsGrid(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const buildings = Object.keys(BUILDINGS);
+  let html = '';
+  buildings.forEach(function(bldg) {
+    const info = BUILDINGS[bldg];
+    const bldgRooms = ROOMS.filter(function(r){ return r.building === bldg; });
+    const occupiedCount = bldgRooms.filter(function(r){ return r.occupied; }).length;
+    html += '<div style="margin-bottom:20px">';
+    html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:10px 14px;background:var(--neu-card);border-radius:10px;border-left:4px solid ' + info.color + ';border:1px solid var(--neu-border);border-left:4px solid ' + info.color + '">';
+    html += '<span style="font-size:20px">' + info.icon + '</span>';
+    html += '<div style="flex:1"><div style="font-family:\'Syne\',sans-serif;font-weight:700;font-size:14px;color:var(--neu-text)">' + bldg + '</div>';
+    html += '<div style="font-size:11px;color:var(--neu-muted);margin-top:1px">' + occupiedCount + ' occupied · ' + (bldgRooms.length - occupiedCount) + ' available</div></div>';
+    html += '<span class="badge" style="background:' + info.color + '20;color:' + info.color + '">' + info.short + '</span>';
+    html += '</div>';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px">';
+    bldgRooms.forEach(function(r) {
+      const bg  = r.occupied ? 'rgba(204,0,0,0.08)' : 'rgba(22,163,74,0.06)';
+      const bdr = r.occupied ? 'rgba(204,0,0,0.3)'  : 'rgba(22,163,74,0.3)';
+      const dot = r.occupied ? '#CC0000' : '#16A34A';
+      const tip = r.occupied ? (r.professor || 'Occupied') : 'Available';
+      html += '<div title="' + tip + '" style="background:' + bg + ';border:1px solid ' + bdr + ';border-radius:8px;padding:6px 8px;text-align:center;cursor:default">';
+      html += '<div style="font-family:\'Syne\',sans-serif;font-weight:700;font-size:13px;color:var(--neu-text)">' + r.number + '</div>';
+      html += '<div style="width:6px;height:6px;border-radius:50%;background:' + dot + ';margin:4px auto 0"></div>';
+      html += '</div>';
+    });
+    html += '</div></div>';
+  });
+  container.innerHTML = html;
+}
+
+// ============================================================
+//  BAR CHART
+// ============================================================
+function renderChart(containerId, type) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const labels    = type === 'week'
+    ? ['Mon','Tue','Wed','Thu','Fri','Sat']
+    : ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const morning   = type === 'week' ? [4,6,5,8,7,3]  : [18,22,19,25,21,17,23,20,24,19,16,14];
+  const afternoon = type === 'week' ? [3,5,4,6,5,2]  : [12,15,14,18,16,12,17,14,19,15,11,10];
+  const maxVal    = Math.max.apply(null, morning.concat(afternoon));
+  let html = '';
+  for (let i = 0; i < labels.length; i++) {
+    const mh = (morning[i]   / maxVal) * 140;
+    const ah = (afternoon[i] / maxVal) * 140;
+    html += '<div class="bar-group">';
+    html += '<div class="bar-wrap">';
+    html += '<div class="bar bar-red"  style="height:' + mh + 'px" title="Morning: '   + morning[i]   + '"></div>';
+    html += '<div class="bar bar-gold" style="height:' + ah + 'px" title="Afternoon: ' + afternoon[i] + '"></div>';
+    html += '</div>';
+    html += '<div class="bar-label">' + labels[i] + '</div>';
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+// ============================================================
+//  ADMIN — PROFESSORS
+// ============================================================
+function blockProfessor(btn, name) {
+  if (!confirm('Block ' + name + '? They will not be able to log in.')) return;
+  btn.closest('tr').querySelector('td:nth-child(6)').innerHTML = '<span class="badge badge-red">Blocked</span>';
+  btn.textContent = 'Unblock';
+  btn.onclick = function(e) { unblockProfessor(e.target, name); };
+  showToast('success', '🚫 Professor Blocked', name + ' can no longer log in.');
+}
+
+function unblockProfessor(btn, name) {
+  btn.closest('tr').querySelector('td:nth-child(6)').innerHTML = '<span class="badge badge-green">Active</span>';
+  btn.textContent = 'Block';
+  btn.onclick = function(e) { blockProfessor(e.target, name); };
+  showToast('success', '✅ Professor Unblocked', name + ' can now log in again.');
+}
+
+// ============================================================
+//  ADMIN — ROOMS
+// ============================================================
+function openAddRoomModal() { openModal('modal-add-room'); }
+
+function addRoom() {
+  const num  = document.getElementById('new-room-number').value.trim();
+  const bldg = document.getElementById('new-room-building').value;
+  if (!num) { showToast('error', '⚠ Required', 'Please enter a room number.'); return; }
+  // Add to ROOMS array so it shows up in session dropdowns and grids
+  const exists = ROOMS.find(function(r){ return r.building === bldg && r.number === num; });
+  if (exists) { showToast('error', '⚠ Duplicate', 'Room ' + num + ' already exists in ' + bldg + '.'); return; }
+  ROOMS.push({ id: bldg + '-' + num, number: num, building: bldg, occupied: false, professor: null, time: null, startTs: null });
+  renderAdminRoomsTable();
+  updateAdminStats();
+  document.getElementById('new-room-number').value = '';
+  closeModal('modal-add-room');
+  showToast('success', '🏫 Room Added', 'Room ' + num + ' in ' + bldg + ' has been added.');
+}
+
+// ============================================================
+//  EXPORT
+// ============================================================
+function exportCSV() {
+  const headers = ['Professor','Room','Date','Start','End','Duration','College','Section','Status'];
+  const rows = [headers];
+  document.querySelectorAll('#all-logs-tbody tr').forEach(function(tr) {
+    const cells = Array.from(tr.querySelectorAll('td')).map(function(td) { return td.textContent.trim(); });
+    rows.push(cells.slice(0, 9));
+  });
+  const csv  = rows.map(function(r) { return r.join(','); }).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'NEU_Lab_Logs.csv';
+  a.click();
+  showToast('success', '⬇ CSV Exported', 'NEU_Lab_Logs.csv has been downloaded.');
+}
+
+function exportPDF() {
+  window.print();
+  showToast('success', '🖨 PDF Ready', 'Print dialog opened for PDF export.');
+}
+
+// ============================================================
+//  FILTERS
+// ============================================================
+// Central log store
+const ALL_LOGS = [];
+
+function applyPeriodFilter() {
+  const period = document.getElementById('filter-period').value;
+  const fromEl = document.getElementById('filter-date-from');
+  const toEl   = document.getElementById('filter-date-to');
+  fromEl.style.display = period === 'custom' ? '' : 'none';
+  toEl.style.display   = period === 'custom' ? '' : 'none';
+  filterLogs();
+}
+
+function filterLogs() {
+  const prof    = document.getElementById('filter-professor').value.toLowerCase();
+  const bldg    = document.getElementById('filter-building').value;
+  const period  = document.getElementById('filter-period').value;
+  const fromVal = document.getElementById('filter-date-from').value;
+  const toVal   = document.getElementById('filter-date-to').value;
+  const now     = new Date();
+
+  function inPeriod(dateStr) {
+    if (period === 'all') return true;
+    const d = new Date(dateStr);
+    if (period === 'today') {
+      return d.toDateString() === now.toDateString();
+    }
+    if (period === 'week') {
+      const start = new Date(now); start.setDate(now.getDate() - now.getDay());
+      start.setHours(0,0,0,0);
+      return d >= start;
+    }
+    if (period === 'month') {
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }
+    if (period === 'custom') {
+      const from = fromVal ? new Date(fromVal) : null;
+      const to   = toVal   ? new Date(toVal + 'T23:59:59') : null;
+      if (from && d < from) return false;
+      if (to   && d > to)   return false;
+      return true;
+    }
+    return true;
+  }
+
+  let count = 0;
+  document.querySelectorAll('#all-logs-tbody tr').forEach(function(tr) {
+    if (tr.id === 'admin-logs-empty') return;
+    const tds      = tr.querySelectorAll('td');
+    const profMatch = !prof || tds[0].textContent.toLowerCase().includes(prof);
+    const bldgMatch = !bldg || tds[2].textContent.includes(bldg);
+    const dateRaw   = tr.dataset.date || '';
+    const periodMatch = inPeriod(dateRaw);
+    const show = profMatch && bldgMatch && periodMatch;
+    tr.style.display = show ? '' : 'none';
+    if (show) count++;
+  });
+  document.getElementById('log-count').textContent = count + ' record' + (count !== 1 ? 's' : '');
+}
+
+function updateAdminStats() {
+  const active = ROOMS.filter(function(r){ return r.occupied; }).length;
+  const total  = ROOMS.length;
+  document.getElementById('stat-total-sessions').textContent = ALL_LOGS.length;
+  const totalMins = ALL_LOGS.reduce(function(sum, l){ return sum + (l.durationMins || 0); }, 0);
+  document.getElementById('stat-total-hours').textContent = Math.round(totalMins / 60) + 'h';
+  document.getElementById('stat-active-rooms').textContent = active;
+  document.getElementById('stat-rooms-sub').textContent = 'of ' + total + ' total rooms';
+  const profs = new Set(ALL_LOGS.map(function(l){ return l.professor; }));
+  document.getElementById('stat-professors').textContent = profs.size;
+  // Refresh live room grids
+  renderRoomsGrid('rooms-grid-admin');
+  renderRoomsGrid('rooms-grid-prof');
+}
+
+function filterMyLogs(val) {
+  const v = val.toLowerCase();
+  document.querySelectorAll('#my-logs-tbody tr').forEach(function(tr) {
+    if (tr.id === 'my-logs-empty') return;
+    tr.style.display = !v || tr.textContent.toLowerCase().includes(v) ? '' : 'none';
+  });
+}
+
+function hideEmptyRow() {
+  const empty = document.getElementById('my-logs-empty');
+  if (empty) empty.remove();
+}
+
+// ============================================================
+//  MODALS
+// ============================================================
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ============================================================
+//  TOAST
+// ============================================================
+function showToast(type, title, msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-msg').textContent   = msg;
+  toast.className = 'toast ' + type + ' show';
+  setTimeout(function() { toast.classList.remove('show'); }, 3500);
+}
+
+// ============================================================
+//  CLOCK
+// ============================================================
+function startClock(id) {
+  if (clockInterval) clearInterval(clockInterval);
+  const el = document.getElementById(id);
+  clockInterval = setInterval(function() {
+    if (el) el.textContent = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  }, 1000);
+}
+
+// ============================================================
+//  INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+  setInterval(updateStartTime, 1000);
+});
+
+</script>
+<!-- Firebase SDKs (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDrECL-9GAnaeDAqMP4rud9cAhLjYs3-7Y",
+    authDomain: "neu-laboratory-usage-log-f1437.firebaseapp.com",
+    projectId: "neu-laboratory-usage-log-f1437",
+    storageBucket: "neu-laboratory-usage-log-f1437.firebasestorage.app",
+    messagingSenderId: "39504251598",
+    appId: "1:39504251598:web:adf0d39a2ffc338a69de9f"
+  };
+  firebase.initializeApp(firebaseConfig);
+
+// ============================================================
+//  FIREBASE AUTH STATE OBSERVER
+// ============================================================
+let pendingGoogleUser = null;
+
+// Watch for auth changes (handles page refresh)
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof firebase !== 'undefined') {
+    firebase.auth().onAuthStateChanged(async function(user) {
+      if (user && user.email && user.email.endsWith('@neu.edu.ph')) {
+        const db = firebase.firestore();
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+          const data = userDoc.data();
+          if (data.blocked) { showPage('page-blocked'); return; }
+         if (data.role === 'admin') {
+            currentUser = { uid: user.uid, name: user.displayName, email: user.email, role: 'admin', photo: user.photoURL };
+            renderRoomsGrid('rooms-grid-admin');
+            renderChart('usage-chart', 'week');
+            renderChart('monthly-chart', 'month');
+            startClock('admin-clock');
+            updateAdminStats();
+            showPage('page-admin');
+          } else if (data.college && data.program) {
+            currentUser = { uid: user.uid, name: user.displayName, email: user.email, role: 'professor', photo: user.photoURL, college: data.college, program: data.program };
+            setupProfessorPortal();
+          }
+        }
+      }
+    });
+  }
+});
+
+// ============================================================
+//  PROGRAM SELECTION (post-Google-login step)
+// ============================================================
+function showProgramSelectionModal() {
+  const u = pendingGoogleUser;
+  if (!u) return;
+
+  // Show photo or initials
+  const photoEl = document.getElementById('google-user-photo');
+  if (u.photo) {
+    photoEl.innerHTML = '<img src="' + u.photo + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%" />';
+  } else {
+    photoEl.textContent = u.name ? u.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() : 'P';
+  }
+  document.getElementById('google-user-name').textContent = u.name || 'Professor';
+  document.getElementById('google-user-email').textContent = u.email;
+
+  openModal('modal-program-select');
+}
+
+async function confirmProgramSelect() {
+  const college = document.getElementById('modal-college').value;
+  const program = document.getElementById('modal-program').value;
+  if (!college || !program) {
+    showToast('error', '⚠ Required', 'Please select your college and program.');
+    return;
+  }
+
+  const u = pendingGoogleUser;
+  if (!u) return;
+
+  try {
+    const db = firebase.firestore();
+    await db.collection('users').doc(u.uid).set({
+      name: u.name, email: u.email, role: 'professor',
+      college, program, blocked: false,
+      lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+
+    currentUser = { uid: u.uid, name: u.name, email: u.email, role: 'professor', photo: u.photo, college, program };
+    pendingGoogleUser = null;
+    closeModal('modal-program-select');
+    setupProfessorPortal();
+    showToast('success', '✅ Welcome!', 'Logged in as ' + u.name);
+  } catch (err) {
+    showToast('error', '❌ Error', 'Could not save your profile. Try again.');
+  }
+}
+
+function cancelProgramSelect() {
+  closeModal('modal-program-select');
+  firebase.auth().signOut();
+  pendingGoogleUser = null;
+}
+
+function setupProfessorPortal() {
+  const u = currentUser;
+  // Set name and avatar
+  const nameParts = (u.name || 'P R').split(' ');
+  const initials = (nameParts[0][0] + (nameParts[nameParts.length-1][0] || '')).toUpperCase();
+  document.getElementById('prof-name').textContent = 'Prof. ' + u.name;
+  const avatarEl = document.getElementById('prof-avatar');
+  if (u.photo) {
+    avatarEl.innerHTML = '<img src="' + u.photo + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>';
+    avatarEl.style.padding = '0';
+  } else {
+    avatarEl.textContent = initials;
+  }
+  // Auto-fill college/program (read-only fields)
+  const collegeEl = document.getElementById('form-college');
+  const programEl = document.getElementById('form-program');
+  if (collegeEl && u.college) collegeEl.value = u.college;
+  if (programEl && u.program) programEl.value = u.program;
+  updateStartTime();
+  renderRoomsGrid('rooms-grid-prof');
+  startClock('live-clock');
+  showPage('page-professor');
+}
+
+// ============================================================
+//  QR CODE GENERATOR (no external library needed)
+// ============================================================
+
+function showMyProfile() {
+  if (!currentUser) return;
+  const nameEl = document.getElementById('profile-name-large');
+  const emailEl = document.getElementById('profile-email-large');
+  const photoEl = document.getElementById('profile-photo-large');
+  const collegeEl = document.getElementById('profile-college');
+  const programEl = document.getElementById('profile-program');
+  if (nameEl) nameEl.textContent = 'Prof. ' + currentUser.name;
+  if (emailEl) emailEl.textContent = currentUser.email;
+  if (collegeEl) collegeEl.textContent = currentUser.college || '—';
+  if (programEl) programEl.textContent = currentUser.program || '—';
+  if (photoEl) {
+    if (currentUser.photo) {
+      photoEl.innerHTML = '<img src="' + currentUser.photo + '" style="width:100%;height:100%;object-fit:cover"/>';
+    } else {
+      const parts = (currentUser.name || 'P R').split(' ');
+      photoEl.textContent = (parts[0][0] + (parts[parts.length-1][0] || '')).toUpperCase();
+    }
+  }
+}
+
+// ============================================================
+//  LOGOUT — Firebase signOut + UI reset
+// ============================================================
+function doLogout() {
+  if (typeof firebase !== 'undefined') firebase.auth().signOut();
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  if (clockInterval) { clearInterval(clockInterval); clockInterval = null; }
+  sessionActive = false;
+  document.getElementById('start-session-area').classList.remove('hidden');
+  document.getElementById('active-session-area').classList.add('hidden');
+  showPage('page-login');
+  showToast('success', '👋 Logged Out', 'You have been signed out.');
+}
+</script>
+
+</body>
+</html>
