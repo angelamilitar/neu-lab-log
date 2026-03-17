@@ -859,25 +859,51 @@ tr:hover td { background: rgba(0,0,0,0.02); }
         </div>
       </div>
 
-      <!-- Panel: Professors -->
-      <div class="content-panel" id="panel-professors">
-        <div class="table-card">
-          <div class="table-header">
-            <h3>👥 Professor Accounts</h3>
-            <input type="text" class="search-input" placeholder="Search professor..." />
-          </div>
-          <table>
-            <thead><tr><th>Name</th><th>Email</th><th>College</th><th>Sessions</th><th>Last Active</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody>
-              <tr><td><strong>Juan Dela Cruz</strong></td><td>juan.delacruz@neu.edu.ph</td><td>CITCS</td><td>18</td><td>Today</td><td><span class="badge badge-green">Active</span></td><td><button class="action-btn block" onclick="blockProfessor(this, 'Juan Dela Cruz')">Block</button></td></tr>
-              <tr><td><strong>Maria Santos</strong></td><td>maria.santos@neu.edu.ph</td><td>COE</td><td>24</td><td>Today</td><td><span class="badge badge-green">Active</span></td><td><button class="action-btn block" onclick="blockProfessor(this, 'Maria Santos')">Block</button></td></tr>
-              <tr><td><strong>Pedro Reyes</strong></td><td>pedro.reyes@neu.edu.ph</td><td>CAS</td><td>9</td><td>Today</td><td><span class="badge badge-green">Active</span></td><td><button class="action-btn block" onclick="blockProfessor(this, 'Pedro Reyes')">Block</button></td></tr>
-              <tr><td><strong>Ana Garcia</strong></td><td>ana.garcia@neu.edu.ph</td><td>CON</td><td>15</td><td>Today</td><td><span class="badge badge-green">Active</span></td><td><button class="action-btn block" onclick="blockProfessor(this, 'Ana Garcia')">Block</button></td></tr>
-              <tr><td><strong>Luis Torres</strong></td><td>luis.torres@neu.edu.ph</td><td>CBA</td><td>4</td><td>Mar 10</td><td><span class="badge badge-red">Blocked</span></td><td><button class="action-btn" onclick="unblockProfessor(this, 'Luis Torres')">Unblock</button></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <!-- Panel: Professors / Access Control -->
+<div class="content-panel" id="panel-professors">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+    <div>
+      <h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--neu-text);margin-bottom:4px">Access Control</h2>
+      <p style="font-size:13px;color:var(--neu-muted)">Manage accounts, programs, and access permissions</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <input type="text" class="search-input" id="ac-search" placeholder="Search by name, email, role..." oninput="filterAccessControl()" style="width:260px" />
+      <button class="btn btn-primary btn-sm" onclick="openAddAccountModal()" style="white-space:nowrap">+ Add Account</button>
+    </div>
+  </div>
+
+  <!-- Status Filter Tabs -->
+  <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap" id="ac-filter-tabs">
+    <button class="ac-tab active" onclick="setACFilter('all', this)" style="display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--neu-border);background:var(--neu-red);color:white;transition:all 0.2s">
+      <span id="tab-count-all">0</span> Total
+    </button>
+    <button class="ac-tab" onclick="setACFilter('active', this)" style="display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid rgba(22,163,74,0.4);background:rgba(22,163,74,0.08);color:var(--neu-green);transition:all 0.2s">
+      <span id="tab-count-active">0</span> Active
+    </button>
+    <button class="ac-tab" onclick="setACFilter('admin', this)" style="display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid rgba(230,168,0,0.4);background:rgba(230,168,0,0.08);color:var(--neu-gold);transition:all 0.2s">
+      <span id="tab-count-admin">0</span> Admins
+    </button>
+    <button class="ac-tab" onclick="setACFilter('blocked', this)" style="display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid rgba(204,0,0,0.3);background:rgba(204,0,0,0.06);color:var(--neu-red);transition:all 0.2s">
+      <span id="tab-count-blocked">0</span> Blocked
+    </button>
+  </div>
+
+  <div class="table-card">
+    <table id="ac-table">
+      <thead>
+        <tr>
+          <th>Account</th>
+          <th>Role</th>
+          <th>Program</th>
+          <th>Status</th>
+          <th>Last Login</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="ac-tbody"></tbody>
+    </table>
+  </div>
+</div>
 
       <!-- Panel: Reports -->
       <div class="content-panel" id="panel-reports">
@@ -1836,7 +1862,255 @@ function doLogout() {
   showPage('page-login');
   showToast('success', '👋 Logged Out', 'You have been signed out.');
 }
+
+// ============================================================
+//  ACCESS CONTROL DATA & LOGIC
+// ============================================================
+let AC_ACCOUNTS = [
+  { id: 1, name: 'Jeremias C. Esperanza', email: 'jcesperanza@neu.edu.ph', role: 'admin',     program: 'All Access', college: '', status: 'active', lastLogin: 'Never' },
+  { id: 2, name: 'Maye Finlearn A. Limbaring',     email: 'mayefinlearn.limbaring@neu.edu.ph', role: 'professor', program: 'BS Information System', college: 'College of Informatics and Computing Studies', status: 'active', lastLogin: 'Never' },
+  { id: 3, name: 'Angel F. Florendo',       email: 'angel.florendo@neu.edu.ph', role: 'professor', program: 'BS Entertainment and Multimedia Computing - Digital Animation Technology', college: 'College of Informatics and Computing Studies', status: 'active', lastLogin: 'Never' },
+  { id: 4, name: 'Janice H. Hernandez',        email: 'janice.hernandez@neu.edu.ph', role: 'professor', program: 'BS Computer Science', college: 'College of Informatics and Computing Studies', status: 'active', lastLogin: 'Never' },
+];
+let acCurrentFilter = 'all';
+
+const PROGRAM_SHORTS = {
+  'BS Information System': 'IS — Information Systems',
+  'BS Entertainment and Multimedia Computing - Digital Animation Technology': 'EMC — Entertainment & Multimedia Computing',
+  'BS Entertainment and Multimedia Computing - Game Development': 'EMC — Game Development',
+  'BS Computer Science': 'CS — Computer Science',
+  'BS Information Technology': 'IT — Information Technology',
+  'BS Library and Information Science': 'LIS — Library & Info Science',
+  'All Access': 'All Access'
+};
+
+function getProgramShort(program) {
+  return PROGRAM_SHORTS[program] || program;
+}
+
+function renderAccessControl() {
+  const tbody = document.getElementById('ac-tbody');
+  if (!tbody) return;
+
+  const search = (document.getElementById('ac-search') || {}).value || '';
+  const sv = search.toLowerCase();
+
+  const filtered = AC_ACCOUNTS.filter(function(acc) {
+    const matchFilter =
+      acCurrentFilter === 'all' ||
+      (acCurrentFilter === 'active'  && acc.status === 'active' && acc.role !== 'admin') ||
+      (acCurrentFilter === 'admin'   && acc.role === 'admin') ||
+      (acCurrentFilter === 'blocked' && acc.status === 'blocked');
+    const matchSearch = !sv ||
+      (acc.name  || '').toLowerCase().includes(sv) ||
+      (acc.email || '').toLowerCase().includes(sv) ||
+      (acc.role  || '').toLowerCase().includes(sv);
+    return matchFilter && matchSearch;
+  });
+
+  // Update tab counts
+  document.getElementById('tab-count-all').textContent     = AC_ACCOUNTS.length;
+  document.getElementById('tab-count-active').textContent  = AC_ACCOUNTS.filter(function(a){ return a.status === 'active' && a.role !== 'admin'; }).length;
+  document.getElementById('tab-count-admin').textContent   = AC_ACCOUNTS.filter(function(a){ return a.role === 'admin'; }).length;
+  document.getElementById('tab-count-blocked').textContent = AC_ACCOUNTS.filter(function(a){ return a.status === 'blocked'; }).length;
+
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--neu-muted);padding:28px">No accounts found.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(function(acc) {
+    const initials = (acc.name || 'U').split(' ').map(function(w){ return w[0]; }).join('').slice(0,2).toUpperCase();
+    const avatarBg = acc.role === 'admin' ? 'linear-gradient(135deg,#2563EB,#1d4ed8)' : 'linear-gradient(135deg,var(--neu-red),var(--neu-gold))';
+    const statusBadge = acc.status === 'blocked'
+      ? '<span class="badge badge-red">● Blocked</span>'
+      : '<span class="badge badge-green">● Active</span>';
+
+    const roleOptions = ['professor','admin'].map(function(r) {
+      return '<option value="' + r + '"' + (acc.role === r ? ' selected' : '') + '>' + (r.charAt(0).toUpperCase() + r.slice(1)) + '</option>';
+    }).join('');
+
+    const programShort = getProgramShort(acc.program);
+    const isAdmin = acc.role === 'admin';
+    const programCell = isAdmin
+      ? '<td><span class="badge badge-gold" style="font-size:12px">' + programShort + '</span></td>'
+      : '<td><div style="display:flex;align-items:center;gap:6px">' +
+          '<span style="font-size:13px;color:var(--neu-text)">' + programShort + '</span>' +
+        '</div></td>';
+
+    const blockBtn = acc.status === 'blocked'
+      ? '<button class="action-btn" style="color:var(--neu-green);border-color:rgba(22,163,74,0.4)" onclick="toggleACBlock(' + acc.id + ')">Unblock</button>'
+      : '<button class="action-btn block" onclick="toggleACBlock(' + acc.id + ')">Block</button>';
+
+    return '<tr data-acc-id="' + acc.id + '">' +
+      '<td><div style="display:flex;align-items:center;gap:10px">' +
+        '<div style="width:32px;height:32px;border-radius:50%;background:' + avatarBg + ';display:flex;align-items:center;justify-content:center;font-family:\'Syne\',sans-serif;font-weight:700;font-size:12px;color:white;flex-shrink:0">' + initials + '</div>' +
+        '<div><div style="font-weight:500;font-size:13px;color:var(--neu-text)">' + (acc.name || '—') + '</div>' +
+        '<div style="font-size:11px;color:var(--neu-muted)">' + acc.email + '</div></div>' +
+      '</div></td>' +
+      '<td><select class="input-field" style="margin:0;padding:6px 10px;font-size:12px;width:120px" onchange="changeACRole(' + acc.id + ', this.value)">' + roleOptions + '</select></td>' +
+      programCell +
+      '<td>' + statusBadge + '</td>' +
+      '<td style="color:var(--neu-muted);font-size:12px">' + acc.lastLogin + '</td>' +
+      '<td>' + blockBtn + '<button class="action-btn" style="color:#dc2626;border-color:rgba(220,38,38,0.4)" onclick="removeACAccount(' + acc.id + ')">Remove</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function setACFilter(filter, btn) {
+  acCurrentFilter = filter;
+  document.querySelectorAll('.ac-tab').forEach(function(t) {
+    t.style.background = '';
+    t.style.color = '';
+  });
+  // Style active tab
+  const styles = {
+    all:     { bg: 'var(--neu-red)',                  color: 'white' },
+    active:  { bg: 'rgba(22,163,74,0.15)',            color: 'var(--neu-green)' },
+    admin:   { bg: 'rgba(230,168,0,0.15)',            color: 'var(--neu-gold)' },
+    blocked: { bg: 'rgba(204,0,0,0.12)',              color: 'var(--neu-red)' },
+  };
+  if (btn && styles[filter]) {
+    btn.style.background = styles[filter].bg;
+    btn.style.color = styles[filter].color;
+  }
+  renderAccessControl();
+}
+
+function filterAccessControl() { renderAccessControl(); }
+
+function toggleACBlock(id) {
+  const acc = AC_ACCOUNTS.find(function(a){ return a.id === id; });
+  if (!acc) return;
+  acc.status = acc.status === 'blocked' ? 'active' : 'blocked';
+  showToast(acc.status === 'blocked' ? 'error' : 'success',
+    acc.status === 'blocked' ? '🚫 Account Blocked' : '✅ Account Unblocked',
+    acc.name + (acc.status === 'blocked' ? ' can no longer log in.' : ' can now log in again.')
+  );
+  renderAccessControl();
+}
+
+function changeACRole(id, newRole) {
+  const acc = AC_ACCOUNTS.find(function(a){ return a.id === id; });
+  if (!acc) return;
+  acc.role = newRole;
+  if (newRole === 'admin') acc.program = 'All Access';
+  showToast('success', '✅ Role Updated', (acc.name || acc.email) + ' is now a ' + newRole + '.');
+  renderAccessControl();
+}
+
+function removeACAccount(id) {
+  const acc = AC_ACCOUNTS.find(function(a){ return a.id === id; });
+  if (!acc) return;
+  if (!confirm('Remove account for ' + (acc.name || acc.email) + '? This cannot be undone.')) return;
+  AC_ACCOUNTS = AC_ACCOUNTS.filter(function(a){ return a.id !== id; });
+  showToast('success', '🗑 Account Removed', (acc.name || acc.email) + ' has been removed.');
+  renderAccessControl();
+}
+
+function openAddAccountModal() {
+  document.getElementById('new-acc-name').value = '';
+  document.getElementById('new-acc-email').value = '';
+  document.getElementById('new-acc-role').value = 'professor';
+  document.getElementById('new-acc-college').value = '';
+  document.getElementById('new-acc-program').innerHTML = '<option value="">— Select Program —</option>';
+  document.getElementById('new-acc-program-group').style.display = '';
+  openModal('modal-add-account');
+}
+
+function toggleNewAccProgram() {
+  const role = document.getElementById('new-acc-role').value;
+  document.getElementById('new-acc-program-group').style.display = role === 'admin' ? 'none' : '';
+}
+
+function updateNewAccPrograms() {
+  const college = document.getElementById('new-acc-college').value;
+  const sel = document.getElementById('new-acc-program');
+  sel.innerHTML = '<option value="">— Select Program —</option>';
+  if (college && NEU_PROGRAMS[college]) {
+    NEU_PROGRAMS[college].forEach(function(p) {
+      const opt = document.createElement('option');
+      opt.value = opt.textContent = p;
+      sel.appendChild(opt);
+    });
+  }
+}
+
+function addAccount() {
+  const name    = document.getElementById('new-acc-name').value.trim();
+  const email   = document.getElementById('new-acc-email').value.trim().toLowerCase();
+  const role    = document.getElementById('new-acc-role').value;
+  const college = document.getElementById('new-acc-college').value;
+  const program = role === 'admin' ? 'All Access' : document.getElementById('new-acc-program').value;
+
+  if (!name || !email) { showToast('error', '⚠ Required', 'Please fill in name and email.'); return; }
+  if (!email.endsWith('@neu.edu.ph')) { showToast('error', '⚠ Invalid Email', 'Only @neu.edu.ph emails are allowed.'); return; }
+  if (role !== 'admin' && !program) { showToast('error', '⚠ Required', 'Please select a program.'); return; }
+  if (AC_ACCOUNTS.find(function(a){ return a.email === email; })) { showToast('error', '⚠ Duplicate', 'An account with this email already exists.'); return; }
+
+  const newId = AC_ACCOUNTS.length ? Math.max.apply(null, AC_ACCOUNTS.map(function(a){ return a.id; })) + 1 : 1;
+  AC_ACCOUNTS.push({ id: newId, name, email, role, program, college, status: 'active', lastLogin: 'Never' });
+
+  closeModal('modal-add-account');
+  showToast('success', '✅ Account Added', name + ' has been added as a ' + role + '.');
+  renderAccessControl();
+}
+
+// Hook into showAdminPanel to init access control on first open
+const _origShowAdminPanel = showAdminPanel;
+showAdminPanel = function(panelId, el) {
+  _origShowAdminPanel(panelId, el);
+  if (panelId === 'panel-professors') renderAccessControl();
+};
+
 </script>
+
+<!-- Add Account Modal -->
+<div class="modal-overlay" id="modal-add-account">
+  <div class="modal" style="max-width:500px">
+    <h3>➕ Add Account</h3>
+    <p class="modal-sub">Create a new professor or admin account.</p>
+    <label>Full Name</label>
+    <input class="input-field" id="new-acc-name" placeholder="e.g. Maria Santos" />
+    <label>Email Address</label>
+    <input class="input-field" id="new-acc-email" placeholder="e.g. maria.santos@neu.edu.ph" />
+    <label>Role</label>
+    <select class="input-field" id="new-acc-role" onchange="toggleNewAccProgram()">
+      <option value="professor">Professor</option>
+      <option value="admin">Admin</option>
+    </select>
+    <div id="new-acc-program-group">
+      <label>College</label>
+      <select class="input-field" id="new-acc-college" onchange="updateNewAccPrograms()">
+        <option value="">— Select College —</option>
+        <option>College of Accountancy</option>
+        <option>College of Agriculture</option>
+        <option>College of Arts and Sciences</option>
+        <option>College of Business Administration</option>
+        <option>College of Communication</option>
+        <option>College of Informatics and Computing Studies</option>
+        <option>College of Criminology</option>
+        <option>College of Education</option>
+        <option>College of Engineering and Architecture</option>
+        <option>College of Medical Technology</option>
+        <option>College of Midwifery</option>
+        <option>College of Music</option>
+        <option>College of Nursing</option>
+        <option>College of Physical Therapy</option>
+        <option>College of Respiratory Therapy</option>
+        <option>School of International Relations</option>
+      </select>
+      <label>Program</label>
+      <select class="input-field" id="new-acc-program">
+        <option value="">— Select Program —</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-add-account')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="addAccount()">Add Account</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
